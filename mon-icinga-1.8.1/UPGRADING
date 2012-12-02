@@ -1,0 +1,34 @@
+Upgrading (to) Icinga 1.x
+-------------------------
+
+The HTML documentation covers what you need to know in order
+to upgrade. You can find the documentation in
+the following subdirectory:
+
+	html/docs
+
+or on
+	http://docs.icinga.org
+
+Make sure to read the following sections:
+
+- "What's New"
+http://docs.icinga.org/latest/en/whatsnew.html
+
+- "Upgrading (to) Icinga"
+http://docs.icinga.org/latest/en/upgrading.html
+
+Furthermore, read the Changelog CHANGES section, in order to get
+informed about possible breaking changes, as well as new config
+options. Tip: $ diff -ur old.cfg new.cfg
+
+If you are using IDOUtils, also read the upgrade docs on how to
+proceed with updating your database schema (which is mandatory
+to be updated too!).
+
+- "Upgrading IDOUtils Database"
+http://docs.icinga.org/latest/en/upgrading_idoutils.html
+
+
+
+

@@ -1,0 +1,61 @@
+#!/usr/bin/perl
+#
+#  --- [icinga_check_load] Perl Script for Icinga ---
+#
+# Author(s):     Ryan Irujo
+# Inception:     05.28.2012
+# Last Modified: 11.25.2012
+#
+# Description:   Script that calls on the 'check_load' Nagios Plugin and returns back the current
+#                CPU Load on a Host, Performance Data from the 'check_load' Plugin and
+#                additional Performance Data based upon how long the check took to run.
+#
+#
+# Changes:       11.25.2012 - [R. Irujo]
+#		 - Renamed file from 'icinga_check_load_v2' to 'icinga_check_load'.
+#
+#
+# Command Line:  ./icinga_check_load "[Warning_CPU_Load_Value]" "[Critical_CPU_Load_Value]"
+# NRPE Examples: ./check_nrpe -H srv101.fabrikam.com -c icinga_check_load "5.0,4.0,3.0" "10.0,6.0,4.0"
+
+use Time::HiRes qw(gettimeofday tv_interval);
+chomp($HostName =`hostname`);
+
+$Warning   = $ARGV[0];
+$Critical  = $ARGV[1];
+
+if (!defined $Warning || $Warning eq ""){
+        print "A [Warning_CPU_Load_Value] has not been provided.\n";exit 3;
+        }
+if (!defined $Critical || $Critical eq ""){
+        print "A [Critical_CPU_Load_Value] has not been provided.\n";exit 3;
+        }
+
+
+# CPU Load Check Start Time
+$Query_Start = [gettimeofday];
+
+# CPU Load Check
+chomp($CPU_Load = `/usr/lib64/nagios/plugins/check_load -w $Warning -c $Critical `);
+
+# CPU Load Check End Time and Final Calculation
+$Query_End = [gettimeofday];
+$Run_Time  = tv_interval $Query_Start, $Query_End;
+
+
+# Final Results and Performance Data are Calculated.
+if(!$CPU_Load){
+        print "There was a problem accessing the [check_load] Nagios Plugin, login to [$HostName] and see if the [check_load] Plugin is in the [/usr/lib64/nagios/plugins] Directory.\n";exit 3;
+        }
+elsif($CPU_Load =~ m/WARNING/i) {
+    print "$CPU_Load 'Check_Time'=$Run_Time\s;;;0.000000;60.000000;\n";exit 1;
+        }
+elsif($CPU_Load =~ m/CRITICAL/i) {
+    print "$CPU_Load 'Check_Time'=$Run_Time\s;;;0.000000;60.000000;\n";exit 2;
+        }
+elsif($CPU_Load =~ m/OK/i) {
+    print "$CPU_Load 'Check_Time'=$Run_Time\s;;;0.000000;60.000000;\n";exit 0;
+        }
+
+
+

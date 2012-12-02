@@ -1,0 +1,56 @@
+#!/usr/bin/perl
+#
+#  --- [icinga_check_ps_service] Perl Script for Icinga ---
+#
+# Author(s):     Ryan Irujo
+# Inception:     02.10.2012
+# Last Modified: 05.16.2012
+#
+# Changes:       05.16.2012 - [R. Irujo]
+#                Added Performance Data to the Script to return a value of "1" if the Service
+#                is found in a running state and a "0" if it is not. The length of time that the Script
+#                takes to run has also been added to the Script and is outputted as Performance Data.
+#
+# Description:   Simple 'grep' based check to verify that a service/process is running based
+#                upon its command name.
+#
+# Command Line:  ./icinga_check_ps_service "[Service_Description]" "[String_Value]"
+# NRPE Examples: ./check_nrpe -H srv101.fabrikam.com -c icinga_check_ps_service -c "'nscd service'" "nscd"
+
+use Time::HiRes qw(gettimeofday tv_interval);
+
+chomp($HostName =`hostname`);
+
+$ServiceName = $ARGV[0];
+$GrepCheck   = $ARGV[1];
+
+if (!defined $ServiceName || $ServiceName eq ""){
+        print "A [Service_Description] has not been provided.\n";exit 3;
+        }
+if (!defined $GrepCheck || $GrepCheck eq ""){
+        print "A [String_Value] has not been provided.\n";exit 3;
+        }
+
+
+#Process Check Start Time
+$Query_Start = [gettimeofday];
+
+#Process Check
+chomp($ProcessCheck = `ps -eo cmd | grep "$GrepCheck" | grep -v grep | grep -v "icinga_check_ps_service" | sort -d`);
+
+#Process Check End Time and Final Calculation
+$Query_End = [gettimeofday];
+$Run_Time  = tv_interval $Query_Start, $Query_End;
+
+
+if ($ProcessCheck eq ""){
+        $Result = 0;
+        print "$ServiceName is either not running or could not be found, Login to $HostName and Investigate. | 'Process_State'=$Result;;;0.0;10.0 'Check_Time'=$Run_Time\s;;;0.000000;60.000000;\n";exit 2;
+        }
+elsif ($ProcessCheck ne ""){
+        $Result = 1;
+        print "$ServiceName is running on $HostName | 'Process_State'=$Result;;;0.0;10.0 'Check_Time'=$Run_Time\s;;;0.000000;60.000000;\n";exit 0;
+        }
+
+
+

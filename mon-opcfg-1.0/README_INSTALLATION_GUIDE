@@ -1,0 +1,76 @@
+##################################################################################################
+#
+# [mon-opcfg] - Installation Guide
+#
+# Author:       [R. Irujo]
+# Inception:    04.14.2012
+#
+# Last Updated: 11.03.2012 - [R. Irujo] - Directions Updated.
+#
+##################################################################################################
+
+Once you have successfully installed the 'mon-opcfg rpm' file, do the following:
+
+   - Login to your MySQL Database as 'root'
+     "mysql -u root -p;"
+
+
+   - Create a new MySQL Database for OpCfg:
+     "create database opcfg;"
+
+
+   - If you are not using the 'root' MySQL Account to use OpCfg, Create a User and Grant Priviliges
+     to that user to access the 'opcfg database'.
+     "GRANT ALL PRIVILEGES ON opcfg.* TO 'mysql_username'@'localhost' WITH GRANT OPTION;"
+     "FLUSH PRIVILEGES;"
+     "quit;"
+
+
+   - Modify the 'config.inc' file in the 'includes' directory.
+     "vim /usr/local/icinga/share/opcfg/includes/config.inc"
+
+   
+   - Add in the 'MySQL OpCfg Database' 'username' and 'password' that you created earlier.
+     You should only have to fill in the 'password' and 'database' fields below. The Exception
+     to this would be in your 'OpCfg Database' is called something else other than 'opcfg'.
+
+     $sitedb_config['host']     = 'localhost';
+     $sitedb_config['username'] = 'mysql_username';
+     $sitedb_config['password'] = 'mysql_password';
+     $sitedb_config['database'] = 'opcfg';
+     $sitedb_config['dbserv']   = 'mysql';
+
+
+   - Import the 'Initial Configuration OpCfg Database' into the 'opcfg' database:
+     "cd /usr/local/icinga/share/opcfg/sqldata/"
+     "sudo su"
+     "sudo mysql -f -u <username> -p opcfg < OpCfg_Initial_Config_Icinga_Core_[x.x.x]_[MM.DD.YYYY].sql"
+
+ 
+   - Grant the 'Apache User' 'sudo' permissions to restart Icinga
+     "sudo vim /etc/sudoers"
+
+  
+   - Add in the following line in the 'sudoers' file:
+     "apache  ALL=(ALL) NOPASSWD: /etc/init.d/icinga"
+
+
+   - Edit your 'php.ini' to quiet 'Warnings' that might occur in 'OpCfg'.
+     "vim /etc/php.ini"
+
+
+   - Edit the 'error_reporting' line to look like the following:
+     "error_reporting = E_ALL & ~E_NOTICE"
+
+
+   - Restart 'Apache'
+     "sudo /etc/init.d/httpd restart"
+
+   
+   - Verify that you hae access to the 'OpCfg Web Interface' by going to the following URL:
+     "http://<localhost>/icinga/opcfg"
+   
+   
+   - DONE!
+
+

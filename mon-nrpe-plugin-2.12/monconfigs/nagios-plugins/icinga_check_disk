@@ -1,0 +1,65 @@
+#!/usr/bin/perl
+#
+#  --- [icinga_check_disk] Perl Script for Icinga ---
+#
+# Author(s):     Ryan Irujo
+# Inception:     05.22.2012
+# Last Modified: 11.25.2012
+#
+# Description:   Script that calls on the 'check_disk' Nagios Plugin and returns back the current
+#                Disk Space on a partition on a Host, Performance Data from the 'check_disk' Plugin and
+#                additional Performance Data based upon how long the check took to run.
+#
+#
+# Changes:       05.29.2012 - [R. Irujo]
+#                - Updated Command and NRPE Example shown below.
+#	
+#		 11.25.2012 - [R. Irujo]
+#		 - Renamed file from 'icinga_check_disk_v2' to 'icinga_check_disk'.
+#
+#
+# Command Line:  ./icinga_check_disk "[Critcal_Percent_Value]" "[Disk_Path]"
+# NRPE Examples: ./check_nrpe -H srv101.fabrikam.com -c icinga_check_disk -a "5%" "/var/log"
+
+use Time::HiRes qw(gettimeofday tv_interval);
+chomp($HostName =`hostname`);
+
+$Critical  = $ARGV[0];
+$Disk_Path = $ARGV[1];
+
+if (!defined $Critical || $Critical eq ""){
+        print "A [Critical_Percentage_Value] has not been provided.\n";exit 3;
+        }
+if (!defined $Disk_Path || $Disk_Path eq ""){
+        print "A [Disk_Path] has not been provided.\n";exit 3;
+        }
+
+
+# Disk Space Check Start Time
+$Query_Start = [gettimeofday];
+
+# Disk Space Check
+chomp($Disk_Check = `/usr/lib64/nagios/plugins/check_disk -c $Critical  -p $Disk_Path `);
+#print"|$Disk_Check|\n";
+
+# Disk Space Check End Time and Final Calculation
+$Query_End = [gettimeofday];
+$Run_Time  = tv_interval $Query_Start, $Query_End;
+
+
+# Final Results and Performance Data are Calculated.
+if(!$Disk_Check){
+        print "There was a problem accessing the [check_disk] Nagios Plugin, login to [$HostName] and see if the [check_disk] Plugin is in the [/usr/lib64/nagios/plugins] Directory.\n";exit 3;
+        }
+elsif($Disk_Check =~ m/WARNING/i) {
+    print "$Disk_Check; 'Check_Time'=$Run_Time\s;;;0.000000;60.000000;\n";exit 1;
+        }
+elsif($Disk_Check =~ m/CRITICAL/i) {
+    print "$Disk_Check; 'Check_Time'=$Run_Time\s;;;0.000000;60.000000;\n";exit 2;
+        }
+elsif($Disk_Check =~ m/OK/i) {
+    print "$Disk_Check; 'Check_Time'=$Run_Time\s;;;0.000000;60.000000;\n";exit 0;
+        }
+
+
+

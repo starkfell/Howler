@@ -1,0 +1,43 @@
+#!/usr/bin/perl
+#
+#  --- [icinga_check_ntp] Perl Script for Icinga ---
+#
+# Author(s):     Ryan Irujo,Brian Shaw
+# Inception:     01.16.2012
+# Last Modified: 02.24.2012
+#
+# Changes:       02.24.2012 - Fixed Syntax Error where a "." after the $Critical Value on the Performance Data
+#                             passed in the result was causing PNP4Nagios to return an error instead of displaying
+#                             the graph properly on a Critical State.
+#
+# Command Line:  ./icinga_check_process_count "1250"
+# NRPE Call:     ./check_nrpe -H testserver201.fabrikam.com -c icinga_check_ntp -a "1500"
+
+use Scalar::Util qw(looks_like_number);
+
+chomp($hostname =`hostname`);
+$critical = $ARGV[0];
+$oldway   = 0;
+$oldway   = 1 if($ARGV[1]=="-o");
+
+
+if ($oldway == 1){
+        chomp($ntp_check = `/usr/sbin/ntpq -p -n|cut -c 65-70|tail -n+3|sort -rn|head -1`);
+        }
+else {
+        chomp($ntp_check = `/usr/sbin/ntpq -p -n|grep "*" |cut -c 65-70`);
+        }
+
+
+if (!defined $critical || $critical eq ""){
+        print "An Argument Value for [critical] has not been provided.\n";exit 3;
+        }
+elsif (!looks_like_number($critical)){
+        print "The Arugment Value for [critical] needs to be a number!\n";exit 3;
+        }
+elsif ($ntp_check > $critical){
+        print "NTP offset = $ntp_check - Offset Value is above normal. Login to $hostname and investigate. | 'NTP_Offset'=$ntp_check;0.00;$critical;0.00;60;\n";exit 2;
+        }
+elsif ($ntp_check <= $critical){
+        print "NTP offset = $ntp_check - Offset Value is normal.| 'NTP_Offset'=$ntp_check;0.00;$critical;0.00;60;\n";exit 0;
+        }

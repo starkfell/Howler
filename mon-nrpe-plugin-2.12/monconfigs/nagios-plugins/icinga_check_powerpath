@@ -1,0 +1,53 @@
+#!/usr/bin/perl
+#
+#  --- [icinga_check_powerpath] Perl Script for Icinga ---
+#
+# Author(s):     Ryan Irujo
+# Inception:     03.21.2012
+# Last Modified: 03.21.2012
+#
+# Description:   Script that Counts the Number of EMC PowerPath Devices attached to a Server and 
+#                sorts them based upon their current State. Any Devices found in a 'Dead' State will
+#                cause the Monitor to go into a Critical State.
+#
+# Command Line:  ./icinga_check_powerpath [Set_Devices]
+# NRPE Examples: ./check_nrpe -H srv101.fabrikam.com -c icinga_check_powerpath 8
+
+chomp($HostName =`hostname`);
+
+$Set_Devices = $ARGV[0];
+$Alive_Count = 0;
+$Dead_Count  = 0;
+
+# Validating Parameters passed to the Script.
+if (!defined $Set_Devices || $Set_Devices eq ""){
+        print "A [Set_Devices] Value must be provided.\n";exit 3;
+        }
+
+# Storing the State of each Attached EMC PowerPath Device in an Array.
+@PowerPathCheck = `cat /etc/powermt-status | grep state | cut -c 0-12`;
+
+# Sorting the State of each Attached EMC PowerPath Device into two variables.
+foreach $value (@PowerPathCheck) {
+	if ($value =~/alive/) {
+	    $Alive_Count++;
+	}
+	elsif ($value =~/dead/) {
+	       $Dead_Count++;
+	}
+}
+
+# Total Number of Attached EMC PowerPath Devices.
+$Total_Count = ($Alive_Count + $Dead_Count);
+
+# Final Results are processed and Returned.
+if ($Dead_Count > 0) {
+	print "[$Dead_Count] EMC PowerPath Devices are in a Dead State. Login to $HostName and Investigate. |'PowerPathDevices'=$Total_Count;;;0;1000;\n"; exit 2;
+	}
+elsif ($Set_Devices != $Total_Count) {
+	print "EMC PowerPath Devices have been added or removed to $HostName. Notify Monitoring to Adjust the [Set_Devices] value accordingly.|'PowerPathDevices'=$Total_Count;;;0;1000;\n"; exit 3;
+	}
+else {
+	print "All EMC PowerPath Devices are in an Alive State on $HostName.|'PowerPathDevices'=$Total_Count;;;0;1000;\n"; exit 0;
+     }
+

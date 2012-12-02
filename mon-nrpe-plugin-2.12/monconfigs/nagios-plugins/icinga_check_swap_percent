@@ -1,0 +1,69 @@
+#!/usr/bin/perl
+#
+#  --- [icinga_check_swap_percent] Perl Script for Icinga ---
+#
+# Author(s):     Ryan Irujo
+# Inception:     05.17.2012
+# Last Modified: 11.25.2012
+#
+# Description:   Script that calls on the 'check_swap' Nagios Plugin and returns back the current
+#                Swap Check Space on a Host, Performance Data from the 'check_swap' Plugin and
+#                additional Performance Data based upon how long the check took to run.
+#
+#
+# Changes:       05.25.2012 - [R. Irujo]
+#                - The original 'icinga_check_swap_percent' was renamed to 'icinga_check_swap_percent_v2'
+#                  in order to allow backwards compatibility with the 'icinga_check_swap_percent' command
+#                  that is defined in the 'nrpe.cfg' file. The 'icinga_check_swap_percent' command definition
+#                  in 'nrpe.cfg' is set to call the 'check_swap' plugin directly. The other reason
+#                  for renaming is to ensure that PNP4Nagios Graphs come out correctly when using this
+#                  particular plugin as it has its own custom PHP Graph named 'icinga_check_swap_percent_v2.php'
+#
+#		 11.25.2012 - [R. Irujo]
+#		 - Renamed the file 'icinga_check_swap_percent_v2' back to 'icinga_check_swap_percent'.
+#
+#
+# Command Line:  ./icinga_check_swap_percent "[Warning_Percent_Value]" "[Critical_Percent_Value]"
+# NRPE Examples: ./check_nrpe -H srv101.fabrikam.com -c icinga_check_swap_percent "5%" "10%"
+
+use Time::HiRes qw(gettimeofday tv_interval);
+chomp($HostName =`hostname`);
+
+$Warning  = $ARGV[0];
+$Critical = $ARGV[1];
+
+if (!defined $Warning || $Warning eq ""){
+        print "A [Warning_Percentage_Value] has not been provided.\n";exit 3;
+        }
+if (!defined $Critical || $Critical eq ""){
+        print "A [Critical_Percentage_Value] has not been provided.\n";exit 3;
+        }
+
+
+# Swap Check Start Time
+$Query_Start = [gettimeofday];
+
+# Swap Check
+chomp($Swap_Check = `/usr/lib64/nagios/plugins/check_swap -w "$Warning" -c "$Critical"`);
+
+# Swap Check End Time and Final Calculation
+$Query_End = [gettimeofday];
+$Run_Time  = tv_interval $Query_Start, $Query_End;
+
+
+# Final Results and Performance Data are Calculated.
+if(!$Swap_Check){
+        print "There was a problem accessing the [check_swap] Nagios Plugin, login to [$HostName] and see if the [check_swap] Plugin is in the [/usr/lib64/nagios/plugins] Directory.\n";exit 3;
+        }
+elsif($Swap_Check =~ m/WARNING/i) {
+    print "$Swap_Check 'Check_Time'=$Run_Time\s;0;0;0.000000;60.000000;\n";exit 1;
+        }
+elsif($Swap_Check =~ m/CRITICAL/i) {
+    print "$Swap_Check 'Check_Time'=$Run_Time\s;0;0;0.000000;60.000000;\n";exit 2;
+        }
+elsif($Swap_Check =~ m/OK/i) {
+    print "$Swap_Check 'Check_Time'=$Run_Time\s;0;0;0.000000;60.000000;\n";exit 0;
+        }
+
+
+

@@ -1,0 +1,2060 @@
+#######################
+Icinga 1.8.x Change Log
+#######################
+
+Thanks to all contributers, testers and developers. Please read AUTHORS and THANKS for a detailed list :-)
+
+UPGRADE NOTES
+
+* for idoutils database upgrades, check the following for upgrade sql scripts
+	- module/idoutils/db/<yourrdbms>/upgrade/
+* for configuration file changes, check the following for added/removed config options
+	- core, classic ui: sample-config/updates/
+	- idoutils: module/idoutils/config/updates
+
+1.8.1 - 25/10/2012
+
+FIXES
+* core: fix faulty macro cleaning, replacing spaces with pluses where they shouldn't be cleaned #3397 - MF
+
+1.8.0 - 18/10/2012
+
+host object attributes 'vrml_image' and '3dcoords' are deprecated due to the removal of the 3d statusmap (statuswrl).
+
+ENHANCEMENTS
+
+* core: pass long_output to neb api for statechange data #2650 - MF
+* core/classic ui: make hashfunc more efficient by using sdbm #2761 - MF/GB
+* core: try the most common macros ($ARGn$, $USERn$) first (Andreas Ericsson) #2674 - MF
+* core: use binary search when looking up macro names, instead of insane strcmp() loops (Andreas Ericsson) #2675 - MF
+* core: add useful message to p1.pl when epn plugin does not call exit() (Sven Nierlein) #2431 -MF
+* core: re-enable state based escalation ranges, using cast tricks #2878 - MF
+	** livestatus and other neb modules not using the icinga headers won't see those
+* core: add a command to disable notifications program-wide with expire time as scheduled event #905 - MF
+	** DISABLE_NOTIFICATIONS_EXPIRE_TIME, works for global notifications
+* core: add hint on icinga.cfg package location, and tip to read Changelog CHANGES on upgrades #2879 - MF
+* core: add new callback NEBTYPE_CONTACTNOTIFICATIONMETHOD_EXECUTE to allow override of sending notifications #2041 - MF
+* core: only reap results when checkresult_list is not overloaded (max_check_result_list_items) (thx Thomas Gelf) #3099 - MF
+* core: log a message when reaper max time is reached #3159 - MF
+
+* classic ui: Dropped statuswml.cgi #2654 - RB
+* classic ui: Dropped statuswrl.cgi #2359 - RB
+* classic ui: Added action_url/notes_url to status.cgi for csvoutput and jsonoutput #2553 - RB
+* classic ui: Added pagination to various cgi's (thx to ideas and partly source from Nagios, Thruk, Icinga Web) #2725 - RB
+	** status.cgi for host & service status
+	** config.cgi
+	** extinfo.cgi for scheduling queue, comments and downtimes
+	** history.cgi
+	** notifications.cgi
+	** showlog.cgi
+	** icons sourced from "Silk icon set" (http://www.famfamfam.com/lab/icons/silk/) created by Mark James.
+* classic ui: Changed search in config.cgi to regex #2884 - RB
+* classic ui: Added config option to let read-only users see comments and downtimes #2699 - RB
+* classic ui: Added selection of timeperiod for notifications and history #2341 - RB
+* classic ui: add support for disable notifications with expire time to extinfo.cgi, Process Info #905 - MF
+* classic ui: Refactored reading of logfiles again #972 - RB
+* classic ui: Dropped context help entirely #2892 - RB
+* classic ui: Separate host_name/display_name and service_description/display_name in json output #2693 - RB
+* classic ui: Added date/time selection for all date/time input fields #2576 - RB
+* classic ui: Added 'All Problems' to 'Problems' group in menu #2645 - RB
+* classic ui: Added host/service selection for commands, leaving out passive only checks on check reschedule in cmd.cgi #2697 - RB
+* classic ui: add host_has_been_acknowledged and service_has_been_acknowledged to extinfo.cgi jsonoutput (Torsten Rehn) #3000 - MF
+* classic ui: Added host/service group filter to notifications.cgi & history.cgi #2679 - RB
+* classic ui: javascript refresh jumps to page top, not restoring previous scrolling position; add url param 'scroll=' #2855 - MF
+* classic ui: Cleaned up "linkBox" in all cgi's #3154 - RB
+* classic ui: add command to delete host downtime and all associated service downtimes (extinfo.cgi, status.cgi command drop down) #1572 - RD/MF
+* classic ui: Added config option to convert login username to lower case #3171 - AH
+* classic ui: Added a refresh button to tac.cgi in header mode #3164 - RB
+* classic ui: Added state type to JSON in status.cgi #3195 - RB
+
+* idoutils: do not pass host and port if not set in the config, letting mysql|pgsql drivers autoselect the socket #2698 - MF
+* idoutils: fix doubled quotes by skipping escaping data (Oracle only) #2534 - TD
+* idoutils: change hasfunc to use sdbm algorithm for hashing precached objects #2792i - MF/GB
+* idoutils: add disable_notif_expire_time to programstatus table - #905 - MF
+* idoutils: add socket_perm to set unix socket permissions (Lennart Betz) #2659 - MF
+* idoutils: upgradedb script for mysql installs all updates between $version and $currentrelease (Philipp Deneu) #2685 - MF
+* idoutils: add --with-libdbi-driver-dir to configure, libdbi_driver_dir to ido2db.cfg to pass the driver location instead of NULL by default #2691 - MF
+* idoutils: add experimental ido event to en/disable objects to ido2db (unusued in idomod!) #3068 - MF
+
+* install: add --with-mainurl to configure, allowing to set the main frame target url for index.html #2611 - MF
+
+* config: add config added/removed diffs between versions for better upgrading #2608 - MF
+	** sample-config/updates/ and module/idoutils/config/updates/
+
+* contrib: add nginx configuration for icinga classicui by Francisco Miguel Biete into contrib/nginx #2253 - MF
+
+* docs: add a new stylesheet and rework docbook.xsl #3046 - MF
+* docs: add tocs for all sections #3193 - WN
+* docs: add jquery toggle for toc #3193 - MF
+* docs: create a dedicated page for packages and their customizations #2905 - LB
+* docs: create a howto define a command, translate macros and testdrive plugins manually #2692 - WN
+* docs: add a hint to debian backports, ubuntu ppa and rhel repoforge and link to wiki url for quickstart guides #2803 - WN
+* docs: add new icinga-web-intro, icinga reporting for 1.8 #3218 #3264 - LB
+* docs: all other new config options due to 1.8 features, please check https://dev.icinga.org/projects/icinga-docs/versions/80
+
+* icinga.spec: use --with-mainurl to set the default to /icinga/cgi-bin/status.cgi?host=all&type=detail&servicestatustypes=29 #2611 - MF
+* icinga.spec: add devel package #2634 - MF
+
+FIXES
+
+* core: unify check scheduling replacement logic for new events (Andreas Ericsson) #2676 - MF
+* core: get rid of the instame macro usage while logging alerts and states (Andreas Ericsson) #2665 - MF
+* core: revamp the detection of embedded perl usage directive "# icinga: +epn" (Andreas Ericsson) #2197 - MF
+* core: fix whitespaces are not stripped using multiple templates ("use abc, def, ghi") #2701
+* core: make delete_downtime_by_hostname_service_description_start_time_comment threadsafe (Andreas Ericsson) #2899
+* core: bail out early with config error if resource.cfg macros contain NULL values #2879 - MF
+* core: fix logical bug on icinga.cfg detection on config read #2879 - MF
+* core: free raw_command immediately after processing the macros / not needing them anymore - MF
+* core: fsync() files before fclose() (Andreas Ericsson) #2949 - MF
+* ocre: remove weird switch() statement when scanning checkresult queue (Andreas Ericsson) #2950 - MF
+* core: fix deleting too old check result files (Andreas Ericsson) #2951 - MF
+* core: avoid duplicate events when scheduling forced host|service check (Imri Zvik) #2993 - MF
+* core: unknown macros are not replaced, and misleading to single dollar signs #2291 - MF
+	** you can revert to the old behaviour with keep_unknown_macros=1 in icinga.cfg
+* core: fix having empty host/servicegroups, $HOST|SERVICEGROUPMEMBERS$ on-demand macro returns garbage on realloc (thx roguelazer) #2913 - MF
+* core: allow multiple empty (host)groups chained with enabled allow_empty_hostgroup_assignment #2437 - MF
+* core: fixed when deleting an expiring ack the event to delete the ack doesn't get deleted #3084 - RB
+* core: fix error checking on subgroup expanding on host|service|contactgroup members #3088 - MF/RB
+* core: fix lockup on DEL_DOWNTIME_BY_HOST_NAME command #1572 - MF
+* core: fix next_check attribute not updated after scheduling new check #2265 - MF
+
+* classic ui: fix setting send_notification or sticky_ack as GET param has no effect on cmd.cgi acks #2926 - MF
+	** now you can finally disable checkboxes default ticked with these options
+* classic ui: Fixed clicking an (action|notes)url in a row automatically ticks the row for the commands #2809 - RB
+* classic ui: menu search can't handle umlauts in hostnames correctly (changed to utf8) #2999 - MF
+* classic ui: fix cmd.cgi does not read enviroment variable ICINGA_COMMAND_FILE (thx Dirk Goetz) #3106 - MF
+* classic ui: Fixed stylesheets for tac_header and menu not working well #3026 - RB
+
+* idoutils: set result handle explicitely to NULL after dbi_result_free() to prevent memory free'ing corruption #2612 - MF/GB
+* idoutils: fix ignoring mysql password in create_mysqldb.sh #2994 - MF
+* idoutils: fix sla_downtime_select query and result handle; scheduled downtime merge statement #2780 - MF
+* idoutils: fix insert on duplicate key with multiple unique keys marked unsafe in mysql >= 5.5.24; rewrite all queries #3008 - MF
+* idoutils: fix redundant indexes in MySQL schema (thx Michael Renner) #3018 - MF
+* idoutils: re-add missing indexes from #1110 resolving performance issues on all supported rdbms #2618 - MF
+* idoutils: fix IDOUtils on PostgreSQL, recreates service objects in icinga_objects (thx Torsten Fohrer) #3166 - MF
+
+* install: fix icinga.xml for solaris pkg not updated #2609 - CF
+
+* docs: fix wrong charset UTF-8 set in documentation #2091 - MF
+* docs: update the beginners page #3213 - WN
+* docs: update external command descriptions for DEL_DOWNTIME_BY_HOST_NAME, DEL_DOWNTIME_BY_START_TIME_COMMENT, DEL_DOWNTIME_BY_HOSTGROUP_NAME #3165 - WN
+* docs: add tar.gz urls to nsca and nrpe docs #2797 - WN
+* docs: fix cgi.conf - HTML and inline documentation mess and errors #2891 - WN
+* docs: cgiparams: cmd.cgi: send_notifications and sticky_ack now require 0|1 values, default is enabled #2927 - WN
+* docs: replace make db-doc2sql with location of plain schema sqls in etc/schema #2936 - WN
+* docs: fix icinga.conf and HTML documentation mess #2941 - LB
+* docs: fix an illegal_macro_output_char is missing from the sample config #2842 - WN
+* docs: fix Erronous example in Macros documentation #2966 - WN
+* docs: Names of config files irrelevant #3097 - WN
+* docs: fix idoutils db user grants miss EXECUTE #3192 - MF
+* docs: fix rong restart command in list of external commands #3214 - MF
+
+
+* icinga.spec: fix permissions on ido2db.cfg potentially world readable (Aaron Russo) #2897 - MF
+* icinga.spec: drop unsupported configure flags #3037 - MF
+
+CHANGES
+
+* core: neb struct statechange data += long_ouput #2650 - MF
+* core: new command
+	** DISABLE_NOTIFICATIONS_EXPIRE_TIME;<schedule_time>;<expire_time> (set schedule_time to now()) #905
+* core: unknown macros are not left on the output anymore, logging a warning instead
+	** either fix your config (i.e. wrong macros, escape dollar signs with another one)
+	** or set keep_unknown_macros=1 in icinga.cfg to revert to the old behaviour
+* core: max_check_result_list_items will set the max number of checkresults waiting for being processed #3099
+	** if checkresult_list is "full", the checkresult reaper will bail early
+	** leaving the core time to process the existing items on checkresult list
+	** max_check_result_list_items=0 is the default, disabling this feature
+	** max_check_result_list_items=1024 should work in larger distributed setups
+* core: new NEB callback NEBTYPE_CONTACTNOTIFICATIONMETHOD_EXECUTE (606) #2041
+
+* classic ui: changed "cgi_json_version" to 1.8 -> see Changelog_json for changes
+* classic ui: Changed cgi GET params
+	** Added "limit" and "start" for pagination to various cgi's - #2725
+	** Added "ts_start", "ts_end" and "order" to history.cgi and notifications.cgi - #2341
+	** Removed "archive" and "oldestfirst" from history.cgi and notifications.cgi - #2341
+	** Added "start_time", "end_time" and "timeperiod" to notifications.cgi - #2341
+	** "send_notification" and "sticky_ack" on cmd.cgi require 0|1 vars, if not set, default is 1 #2926
+	** add "scroll", interpreted by javascript reload to restore the scrolling position #2855
+	** Added "hostgroup" and "servicegroup" to history.cgi and notifications.cgi #2679
+	** Added "scroll", interpreted by javascript reload to restore the scrolling position #2855
+	** Added "search_string" and "item_name" to config.cgi #2884
+classic ui: Added/Changed cgi.cfg options
+	** authorized_for_comments_read_only - #2699
+	** authorized_for_downtimes_read_only - #2699
+	** authorized_contactgroup_for_comments_read_only - #2699
+	** authorized_contactgroup_for_downtimes_read_only - #2699
+	** "result_limit" (default: 50) - #2725
+	** "result_limit" replaces "default_num_displayed_log_entries" - #2725
+	** default_expiring_disabled_notifications_duration=86400 #905
+	** lowercase_user_name - #3171
+* classic ui: change strings in json output: !!!IMPORTANT!!!
+	** host -> host_name #2693
+	** service -> service_description #2693
+	** description -> service_description #2693
+	** added host_display_name #2693
+	** added service_display_name #2693
+	** added host_has_been_acknowledged and service_has_been_acknowledged to extinfo.cgi #3000
+	** added state_type to host and service status in status.cgi #3195
+* classic ui: added checkbox in cmd.cgi to deselect unintentional selected hosts/services #2697
+
+* idoutils: add disable_notif_expire_time to programstatus table #905
+* idoutils: ido2db.cfg new config options
+	** socket_perm (default 0755) #2659
+	** libdbi_driver_dir (default NULL) #2691
+* idoutils: add experimental IDO_API_{EN,DIS}ABLE_OBJECT in ido2db #3068
+
+* install: add --with-libdbi-driver-dir to configure #2691
+
+* docs: new stylesheet in html/docs/stylesheets/icinga-docs.css #3046
+* docs: add tocs for all sections #3193
+* docs: add toc toogle javascript in html/docs/js/{icinga-docs.js,jquery-min.js} #3193
+
+* icinga.spec: add devel package #2634
+* icinga.spec: forced update on icinga.cfg change package locations #2923
+
+
+
+1.7.2 - 27/08/2012
+
+FIXES
+* core: fix duplicated events on check scheduling logic for new events (Andreas Ericsson) #2676 #2993 - MF
+* core: avoid duplicate events when scheduling forced host|service check (Imri Zvik) #2993 - MF
+* core: get rid of the instame macro usage while logging alerts and states (Andreas Ericsson) #2665 - MF
+* core: revamp the detection of embedded perl usage directive "# icinga: +epn" (Andreas Ericsson) #2197 - MF
+* core: fix whitespaces are not stripped using multiple templates ("use abc, def, ghi") #2701 - MF
+* core: add hint on icinga.cfg package location, and tip to read Changelog CHANGES on upgrades #2879 - MF
+* core: bail out early with config error if resource.cfg macros contain NULL values #2879 - MF
+* core: fix logical bug on icinga.cfg detection on config read #2879 - MF
+* core: fsync() files before fclose() (Andreas Ericsson) #2948 - MF
+* core: remove weird switch() statement when scanning checkresult queue (Andreas Ericsson) #2950 - MF
+* core: fix deleting too old check result files (Andreas Ericsson) #2951 - MF
+
+* idoutils: fix icinga mysql db creation script grants access to all dbs #2917 - MF
+* idoutils: fix ignoring mysql password in create_mysqldb.sh #2994 - MF
+
+* icinga.spec: forced update on icinga.cfg change package locations #2923 -MF
+* icinga.spec: fix permissions on ido2db.cfg potentially world readable (Aaron Russo) #2897 - MF
+
+
+1.7.1 - 18/06/2012
+
+FIXES
+* core: use prefix in solaris service definition #2609 - TD/CF
+* core: fix various memory leaks in downtime eventhandling on SIGHUP (Carlos Velasco) #2666 - MF
+
+* classic ui: Fixed status.cgi time out when displaying hostgroups in large environments #2617 - RB
+* classic ui: Fixed Invalid JSON output for hostgroup overview (Torsten Rehn) #2680 - RB
+* classic ui: Fixed Confusing use of display_name in JSON and CSV output (Torsten Rehn) #2681 - RB
+* classic ui: Fixed wrong totals in "Service Status Summary" on Status Summary page (Mark Ziesemer) #2689 - RB
+
+* idoutils: fix small compiler issues #2620 - TD/CF
+* idoutils: fix upgradedb script typos & past changes #2682 - MF
+
+* config: check_ido2db_procs.cfg should not depend on local-service template #2616 - MF
+
+* install: adapt lsb headers for icinga and ido2db #2637 - MF
+* install: fix typo in contrib/eventhandlers/redundancy-scenario1/handle-master-proc-event (thanks uosiu) #2671 - MF
+
+
+
+1.7.0 - 15/05/2012
+
+!!! ATTENTION !!!
+	idomod.o was renamed to idomod.so, module extension is now .so
+	idomod.so will now be installed to $libdir instead of $bindir
+	Check the upgrade docs: http://docs.icinga.org/latest/en/upgrading.html
+!!! ATTENTION !!!
+
+ENHANCEMENTS
+* core: notifications: Create contact list after eventbroker callbacks (Andreas Ericsson) #2110 - MF
+* core: fix event removal from queues with O(1) removal from doubly linked lists (Andreas Ericsson) #2183 - MF
+* core: avoid senseless looping when free()'ing macros (Andreas Ericsson) #2184 - MF
+* core: avoid insane looping through event list when rescheduling checks (Mathias Kettner, Andreas Ericsson) #2182 - MF
+* core: allow empty host groups in service and host dependencies if allow_empty_hostgroup_assignment flag is set (Daniel Wittenberg) #2255 - MF
+* core: fix compatibility problems on solaris 10 (affects core, cgis, ido) (Carl R. Friend) #2292 - MF/RB/TD
+* core: add trigger_time to downtimes to allow calculating of flexible downtimes endtime #2537 - MF
+* core: add nebmodule version/name check for idomod (this allows future version dependencies) #2569 - MF
+
+* classic ui: Added option for max log entries displayed in showlog.cgi #2145 - RB
+* classic ui: Added config option for status totals in status.cgi #2018 - RB
+* classic ui: Added multiple hosts/services to status.cgi GET #1981 - RB
+* classic ui: Added nostatusheader in status.cgi as config option #2018 - RB
+* classic ui: Added statusmap resizing with exclude/include button (thanks to Mat) #2186 - RB
+* classic ui: Added Select hosts or services by clicking on line instead of box #2118 - RB
+* classic ui: include graph icons by default in logos #2222 - MF
+* classic ui: added missing comment tool tip box to outages.cgi #2396 - RB
+* classic ui: add javascript to refresh page/pause easier #2119 - RB
+* classic ui: Added Scheduling queue filter for specific host or service #2421 - RB
+* classic ui: add display_status_totals as cgi.cfg option in order to allow the status totals to be shown again #2443 - RB
+* classic ui: Changed reading of auth information from cgiauth.c to cgiutils.c #2524 - RB
+* classic ui: Added readonly cgi.cfg view into the config section #1776 - RB
+* classic ui: add is_in_effect and trigger_time to downtime view for html, csv, json #2538 - MF
+* classic ui: add modified attributes row to extinfo.cgi showing diffs to original config (thx Sven Nierlein for the idea) #2473 - MF
+* classic ui: add modified attributes reset command to extinfo.cgi allowing to reset to original config #2474 - MF
+
+* idoutils: add new index for state in table statehistory #2274 - TD
+* idoutils: add is_in_effect and trigger_time to scheduleddowntime and downtimehistory tables #2539 - MF
+* idoutils: change varchar(255) to TEXT in mysql (not cs and address rfc columns) #2181 - MF
+* idoutils: enhance dbversion table with modified and created columns #2562 - MF
+* idoutils: set module info in idomod, to be checked on neb module load in future versions #2569 - MF
+
+* install: add configure option --with-temp-file=<filepath> to set temp_file for icinga.cfg #2121 - MF
+* install: add --with-plugin-dir to configure for setting the plugins path accordingly #2344 - MF
+* install: change default target location of idomod.so from $bindir to $libdir #2346 - MF
+	** packagers dreams come finally true! :)
+* install: introduce "lib/" in default prefix install for modules #2347 - MF
+* install: revamp the broker_module entry in icinga.cfg pointing to new module definition #2348 - MF
+* install: change idomod extension from .o to .so, make .so the default extension for modules #2354 - MF
+* install: add configure target --with-eventhandler-dir and "make install-eventhandlers" for contrib/eventhandlers #2352 - MF
+* install: add --enable-cgi-log to configure to enable cgi logging during build #2364 - MF
+* install: fix configure --ido-instance-name is incorrect, missing 'with' (thx Marco) #2407 - MF
+* install: add --enable-nagiosenv to configure to expose custom variables with prefix NAGIOS_ instead of ICINGA_ for easier reuse of well known check scripts #2083 - TD
+* install: add --with-http-auth-file to allow different file/loc of htpasswd.users #2533 - MF
+* install: make the location of the ido.sock, ido2db.lock, icinga.chk, idomod.tmp configurable #1856 - MF
+* install: use custom state dir instead of hardcoded localstatedir #2583 - MF
+
+* config: introduce conf.d as place for own configs #2360 - MF
+
+* tests: replace libtap with an actively developed version #1192 - MF
+* tests: fix and rewrite perl tests in t/ #2369 - AW
+
+* icinga.spec: use --with-plugin-dir instead of --libexexdir for nagios plugins dir #2344 - MF
+* icinga.spec: make aware of the change of idomod.o location and changed extension (now .so) #2350 - MF
+* icinga.spec: add "README LICENSE Changelog UPGRADING" to all packages as docs (thx Michael Gruener) #2212 - MF
+* icinga.spec: put module/idoutils/db into docs instead of manually copying to /etc/icinga/idoutils (thx Michael Gruener) #2357 - MF
+* icinga.spec: add README.RHEL README.RHEL.idoutils to upstream, being installed as docs (thx Michael Gruener, Stefan Marx) #2212 - MF
+* icinga.spec: use eventhandler configure/make in package creation from #2352 #2363 - MF
+* icinga.spec: use --enable-cgi-log from upstream instead of manual sed #2365 - MF
+* icinga.spec: introduce conf.d as place for own configs #2367 - MF
+* icinga.spec: introduce icinga-idoutils-libdbi-mysql|pgsql as seperate packages #2361 - MF
+* icinga.spec: updates from rhel bug #1666 - MF
+	** move pid file to _localstatedir/run/icinga.pid
+	** install icinga.logrotate example
+	** move ext cmd file location to _localstatedir/spool/icinga/cmd/icinga.cmd
+	** set icinga user's home to _localstatedir/spool/icinga
+	** move checkresults to _localstatedir/spool/icinga/checkresults
+	** use --with-http-auth-file from #2533
+	** add default /etc/icinga/passwd with icingaadmin:icingaadmin default login
+* icinga.spec: use ido2db.lock, ido.sock, idomod.tmp, icinga.chk configure params #1856 - MF
+* icinga.spec: use --with-state-dir for spool dir #2583 - MF
+
+FIXES
+* core: Plug some macro leaks triggered when sending notifications (Andreas Ericsson) #2109 - MF
+* core: mark services as executing only when we know we will actually run them (Andreas Ericsson) #2302 - MF
+* core: fix handling of allow_empty_hostgroup_assignment when hitting NULL'edhost_name attribute, now properly finishing #949 - MF
+* core: drop abbreviations in debug log and make them more telling #2138 - MF
+* core: remove deprecated code for log_external_commands_user #1619 - MF
+* core: fix scheduled_downtime_depth falsely incremented if in flexible downtime with duration < end-starttime window #2536 - MF
+* core: log error reason when failing to create the status file (Ulf Lange) #2560 - MF
+* core: deny to load idomod.o if detected in old config #2354 #2569 - MF
+
+* classic ui: Fixed status totals are wrong when searching #1524 - RB
+* classic ui: Fixed wrong URLs for status.cgi overview #2173 - RB
+* classic ui: Fixed Host status sorting in status.cgi not working #2220 - RB
+* classic ui: Fixed notifications.cgi - memory access error #2234 - RB
+* classic ui: Done clean up document_header() and unused vars in cgi's #2252 - RB
+* classic ui: Fixed status.cgi: host param not honoured with servicefilter #2262 - RB
+* classic ui: fixed Tooltip from action_url interfering with pnp4nagios integration #2198 - RB
+* classic ui: fixed json output for comments and downtimes in extinfo.cgi sometimes invalid #2343 - RB
+* classic ui: fixed invalid json output for tac.cgi #2160 - RB
+* classic ui: Fixed Invalid json data if field value is multiline #2263 - RB
+* classic ui: fixed Commit commands with more then 500 multiple pairs of hosts and services #2373 - RB
+* classic ui: fixed reset forms on return after submitting command #2117 - RB
+* classic ui: Change Excel icon to odf spreadsheet icon #2391 - RB
+* classic ui: fixed Availability Records Break if JavaScript is disabled #2412 - RB
+* classic ui: fixed Truncated HTML table when displaying outages in outages.cgi #2323 - RB
+* classic ui: fixed Log File Navigation in current/ealier/recent archive clarification #2441 - RB
+* classic ui: fixed Extra leading space in status.cgi CSV output #2535 - RB
+* classic ui: fixed Authentication in trends.cgi not working correctly #2209 - RB
+* classic ui: fixed Reuse of a buffer causes incorrect results in scheduling queue display (extinfo.cgi) #2603 - CF
+
+* idoutils: fix ORA-00913 too many values when MERGE INTO eventhandlers #2319 - MF
+* idoutils: change standard string escaping for postgresql queries to use the E'foo' notation #1974 - MF
+* idoutils: fix several build problems in solaris: use supplied sprintf functions in preference over local one, build .so instead of .o shared librarys, use explicit -fPIC compiler switch  #524,#1772,#2354 - TD
+* idoutils: fix core dumps in solaris when using os supplied printf functions #2271,#1253,#2503,#2292 - TD
+* idoutils: fix lob handling in Oracle #2303,#2342 - TD
+* idoutils: fix sample shell db create script for mysql #2358 - TD
+* idoutils: fix OCI-21500 when freeing lobs #2509 - TD
+* idoutils: add note to "if process data is not dumped via idomod, ido2db won't clean tables and set objects inactive" #2237 - MF
+* idoutils: fix pgsql unix_timestamp cannot handle timstamp with timezone #2203 - MF
+* idoutils: fix ido2db forks endless if database is not available, race condition on unclosed socket #2458 - MF/TD/CF
+
+* install: Fix notification template installation (Todd Zullinger) #2235 - MF
+* install: uninstall old idomod.o #2570 - MF
+
+CHANGES
+* neb api: move creation of notification contact list AFTER event broker callback NEBTYPE_NOTIFICATION_START #2110
+	** allows neb modules to cancel/override notification list creation on notification start
+
+* debug: set debug_verbosity=2 by default
+* configure: --enable-libtap=yes by default for builtin 'make test-tap'
+
+* install: --with-temp-file=<filepath> #2121
+	** sets path to an Icinga exclusive update temp file i.e. /tmp/icinga.tmp
+
+* install: --with-plugin-dir=<path> #2344
+	** sets path to plugins directory path i.e. $prefix/libexec
+
+* install: change default target location of idomod.so from $bindir to $libdir #2346
+* install: change idomod extension from .o to .so, make .so the default extension for modules #2354
+	** make sure to UPDATE the location in your CONFIG !!!
+
+* install: introduce "lib/" in default prefix install for modules #2347
+
+* install: --with-eventhandler-dir=<path> #2352
+	** sets path to eventhandler directory path i.e. $prefix/libexec/eventhandlers
+
+* install: make install-eventhandlers #2352
+	** install sample eventhandlers to defined location
+
+* install: --enable-cgi-log #2364
+	** enables cgi logging (EXPERIMENTAL)
+
+* install: --with-http-auth-file #2533
+	** sets location/name of htpasswd.users
+
+* install: ido2db lockfile, ido.sock file, icinga.chk, idomod.tmp as configure params #1856
+	** --with-icinga-chkfile=<path>
+	** --with-ido2db-lockfile=<path>
+	** --with-ido-sockfile=<path>
+	** --with-idomod-tmpfile=<path>
+
+* install: use custom state dir --with-state-dir #2583
+
+* config: $sysconfdir/conf.d #2360
+
+* install: --enable-libtap is now deprecated, new libtap does not require configure anymore #1192
+
+* tests: you can now test with pleasure: $ make distclean ; ./configure ; make test #2369 #1192
+
+* core: add trigger_time to downtimes #2537
+	** downtimes in status.dat/retention.dat now holding trigger_time
+	** nebstruct and event broker api now passing trigger_time and is_in_effect
+* core: nebcallback for downtime start now happens *after* setting "in effect" attributes #2539
+	** needed to pass is_in_effect and trigger_time to neb modules
+* core: new neb module load error: NEBMODULE_ERROR_IDO_VERSION #2569
+
+* classic ui: Added option for max log entries displayed in showlog.cgi #2145
+	** added new config option "default_num_displayed_log_entries"
+	** added new input field to redefine amount of displayed log entries
+	** added "switch" to show/hide filters in showlog.cgi
+
+* classic ui: status.cgi
+	** added new config option "display_status_totals"
+	** you can define more then one object to display
+	 ** host=hostA&host=hostB&host=...
+	 ** same with hostgroups and servicegroups
+	** nostatusheader is still available as URL param
+	** hostgroup=all now only shows hosts which are in a host groups
+	** host sorting is working now
+	** added 2 new cgi vars
+	 ** sortobject = determine if to sort host or service list (host_service_view)
+	 ** allunhandledproblems = to display ALL unhanded problems
+	** fixed and reorganized the links in status totals
+	** searching returns more then one hostgroup/servicegroup if group name matches
+	** combined Host/Service view now properly supported
+	** dropped "ALT" and "TITLE" tag from action url image in host and service status list
+	** status totals are now split into "displayed/all" for filtering
+	** filtering host/services/hostgroups/servicegroups is now possible via status totals
+
+* classic ui: add javascript to refresh page/pause easier #2119
+	** DO A FULL PAGE RELOAD AFTER UPGRADING
+	** no reload necessary to pause refresh
+	** selecting item in status.cgi/extinfo.cgi resets' refresh counter
+	** added cgi config option "refresh_type" to choose between http header refresh and javascript refresh
+
+* classic ui: Added statusmap resizing with exclude/include button #2186
+	** now statusmap get's displayed much better (thanks to Mat)
+
+* classic ui: Added Select hosts or services by clicking on line instead of box #2118
+	** selecting a host/service/downtime/comment checkbox now works also by clicking the row
+
+* classic ui: fixed reset forms on return after submitting command #2117
+	** forms getting reset on page load
+	** fixed problem with downtime checkbox selection
+	** changed all forms to POST request
+
+* classic ui: fixed json output for comments and downtimes in extinfo.cgi sometimes invalid #2343
+	** changes array names in json output of extinfo.cgi
+	 ** comments  -> host_comments  / service_comments
+	 ** downtimes -> host_downtimes / service_downtimes
+
+* classic ui: fixed Commit commands with more then 500 multiple pairs of hosts and services #2373
+	** now it's possible to submit ~990 commands at the same time
+
+* classic ui: outages.cgi
+	** added missing comment tool tip box
+	** fixed truncating of outages list
+
+* classic ui: Added Scheduling queue filter for specific host or service #2421
+	** now everyone who is authorized for can see hosts/services in scheduling queue
+	** added links to host/service extinfo
+
+* classic ui: Added readonly cgi.cfg view into the config section #1776
+	** New Option in config.cgi to view all cgi config options and their current values
+
+* classic ui: statuswml.cgi and statuswrl.cgi are DEPRECATED now !!!!!!!!!
+	** both will be removed in Icinga 1.8 !!!!!!
+
+* classic ui: cmd.cgi now accepts change commands with attr command #2474
+	** CHANGE_HOST_MODATTR, CHANGE_SVC_MODATTR
+	** but ONLY 0 = reset, other values will trigger an error
+
+* idoutils: limit long_output and perfdata database storage in mysql to 32k #2342
+
+* idoutils: enlarge field "FAILURE_PREDICTION_OPTIONS" in table hosts from 64 to 128 Bytes #2479
+
+* idoutils: Oracle only->change method retrieving lastid, introduce individual sequence caching sizes #2510
+
+* idoutils: fix pgsql unix_timestamp cannot handle timstamp with timezone #2203
+
+* idoutils change varchar(255) to TEXT in mysql # 2181
+
+* idoutils: add create_time and modify_time to dbversion table #2562
+	** allows to determine the initial import plus modified date
+
+
+1.6.1 - 02/12/2011
+
+FIXES
+* core: fix freshness checks are generating stale alerts, even if result was received in time #2136
+
+CHANGES
+
+
+
+1.6.0 - 30/11/2011
+
+ENHANCEMENTS
+
+* core: acknowledgements can now expire by providing an end_time through commands #770
+* core: allow startup with no hosts/services/contacts defined, only warn #2015
+* core: log error on non-existing host/service/contact/*group when sending a command to the core #1737
+* core: reduce notification load by moving notification viability check into notification list creation (Opsview Team) #1744
+* core: protect downtime and comment list modification with a lock (Andreas Ericsson) #2025
+* core: determine last_program_stop from creation of retention.dat and use that for decision if passive checks are fresh or not (Andreas Ericsson) #2027
+* core: add icinga startup delay checks to example configs, including perfdata  #1937
+* core: indicate event loop start in logs #2036
+* core: add notifications to stalking hosts/services, not only logging/event handlers #1367
+* core: add eventloop mutex, will be used by IcingaMQ #2040
+
+* classic ui: add expiry option and end_time to acknowledgements on cmd.cgi #770
+* classic ui: Acknowledge child hosts from on blocking outages #1858
+* classic ui: add opt-in extinfo_show_child_hosts to show child hosts in extinfo.cgi #1820
+* classic ui: add complete command line to config.cgi #1329
+	** if resource.cfg readable by webserver for $USERn$ macros
+	** adds host/service params to config.cgi to process their macros
+* classic ui: Add more info of (ack, downtime, ... ) status to json export in status.cgi (ivo) #1988
+* classic ui: add hostgroup and servicegroup summary to menu.html #2007
+* classic ui: Change markup color for unreachable hosts in statusmap.c #1464
+
+* idoutils: add SLA monitoring via opt-in enable_sla cfg option #2037
+	** pgsql timestamp with timezone changes remain experimental in SLA table
+* idoutils: added end_time column for acknowledgelemts expiry #770
+* idoutils: add Indices for notification queries for Icinga Web #1964
+* idoutils: add option to format debug log timestamp like locale %c (debug_readable_timestamp in ido2db.cfg) #2033
+* idoutils: add max_notifications_age, max_contactnotifications_age, max_contactnotificationmethods_age as housekeeping for notification tables #2051
+* idoutils: use local timestamp datatype instead of date/datetime, store icinga timestamps as UTC #1954
+* idoutils: change timestamp to use time zone by default in postgresql (thx Florian Helmberger) #2106
+
+* config: add config examples for local monitoring - check_procs for ido2db #1870
+
+* icinga.spec: enable cmd.cgi logging by default #2124
+
+FIXES
+* core: fix downtime and comments delete with wrong loop pointers causing segfaults #1979
+* core: fix $NOTIFICATIONRECIPIENTS$ macro contains all contacts assigned to host|service, not only notified contacts #2023
+* core: plug memory leak in downtimes comment add (Dorian Guillois) #1979
+* core: make first_notification_delay depend on the first !OK hard state change and don't reset timer for new hard states which would replace it (Rogerio F Cunha) #1918
+* core: fix memory leak in xodtemplate.c (thx Dorian Guillois)
+
+* classic ui: fix for Classic-UI displays bad timeperiods #1989
+* classic ui: fixed wrong color in histogram and trends for unknown/unreachable #2042
+* classic ui: fixed search not returning all results, only first match (without * at the end) #844
+* classic ui: fixed wrong output from status.cgi with option hostservicedetail #2019
+* classic ui: fix typo in histogram.c (thanks Sven-Göran Bergh)
+
+* idoutils: host state change last_hard_state overrides last_state, last_hard_state always -1 #1932
+* idoutils: extend conninfo.agent_version field  to varchar(16) #2104
+* idoutils: terminate threads cleanly, including db connection
+
+* install: rework the version updates in icinga and idoutils
+
+* icinga.spec: --libexecdir does not point to possible location of nagios-plugins in resource.cfg:$USER1$ #2123
+
+CHANGES
+* package: complete remove icinga-api as module #1935
+	** Development is being discontinued for now, 1.5.0 was last combined release.
+	** remove files in module/icinga-api
+	** update configure and mark options deprecated
+	** mark as deprecated in Makefile, install-api spits out warning
+	** remove build from icinga.spec
+	** add module/icinga-api/README for further instructions for non Changelog readers
+
+* core: new commands and event
+	** CMD_ACKNOWLEDGE_HOST_PROBLEM_EXPIRE    174
+	** CMD_ACKNOWLEDGE_SVC_PROBLEM_EXPIRE     175
+	** EVENT_EXPIRE_ACKNOWLEDGEMENT
+* core: new notification type (internal and macros)
+	** NOTIFICATION_STALKING
+
+* classic ui: "showlog_initial_states" and "showlog_current_states" are now disabled by default to prevent browser freezes #1172
+* classic ui: highlight_table_rows is now enabled by default #1777
+* classic ui: removed unused javascript libraries
+	** html/js/: builder.js, controls.js, dragdrop.js, effects.js, slider.js, sound.js, mootools.js
+* classicui: new regex search uses 'search_string' instead of 'navbarsearch=1&host=', both are kept for compatibility reasons #844
+
+* icinga.cfg: stalking_notifications_for_hosts=0 stalking_notifications_for_services=0
+
+* cgi.cfg: default_expiring_acknowledgement_duration=86400
+* cgi.cfg: extinfo_show_child_hosts=0 added
+* cgi.cfg: authorized_for_full_command_resolution and authorized_contactgroup_for_full_command_resolution added
+
+* add objects/ido2db_check_proc.cfg (not included by default) #1870
+* ido2db.cfg
+	** enable_sla=0
+	** debug_readable_timestamp=0
+	** max_notifications_age, max_contactnotifications_age, max_contactnotificationmethods_age
+
+* icinga.spec
+	** enable cmd.cgi logging by default in rpm
+
+1.5.1 - 09/09/2011
+
+FIXES
+* core: free memory allocated notification macros right after sending the notification, not in next notification
+
+* classic ui: fix Localization: Form validation message could be improved (thx Mario Rimann) #1849
+* classic ui: fix wrong titles in list of scheduled downtimes (thx Mario Rimann) #1848
+* classic ui: fix host and service names are not allowed to have a '+' included #1843
+* claasic ui: fix service overview for single hostgroups when show_partial_hostgroups is switched on #1013
+* claasic ui: fix authorized_for_all_hosts/authorized_for_all_services retruns true for historical data #1166
+
+* idoutils: idomod: change stacked memory allocation for broker_data IDO_MAX_BUFLEN #1879
+* idoutils: fix idomod should log more verbose on errors, asking for a running ido2db process #1885
+
+* spec file: re-add processing headers
+
+CHANGES
+
+
+
+1.5.0 - 24/08/2011
+
+ENHANCEMENTS
+* core: do not update host/service status during scheduler initialization on startup (idoutils already know that) #1741
+
+* classic ui: Added option to suppress coloring of hosts/services in maintenance #992
+* classic ui: Added option to show partial hostgroups #1013
+* classic ui: changing drop down menu in status.cgi to jquery-dd #1644
+* classic ui: default downtime duration is configurable in cgi.cfg #1642
+* classic ui: Added ability to combine host and service in one CGI parameter (Aaron Brady) #1633
+* classic ui: Changed tac.cgi to distinct between active, passive and disabled properly #1120
+* classic ui: Add log entries to json output of avail.cgi #1659
+* classic ui: add host urgency sort order in status.cgi (Jochen Bern) #1452
+* classic ui: add author to comment tooltips in status.cgi #1691
+* classic ui: reduce the header part of status.cgi #1507
+	** &nostatusheader used in frameset menu, info table is smaller
+* classic ui: authorization for * in cgi.cfg via contactgroups (Stephen Gran) #1752
+	** authorized_contactgroup_for_all_hosts, authorized_contactgroup_for_all_services, authorized_contactgroup_for_system_information,
+	** authorized_contactgroup_for_configuration_information, authorized_contactgroup_for_all_host_commands,
+	** authorized_contactgroup_for_all_service_commands, authorized_contactgroup_for_system_commands, authorized_contactgroup_for_read_only
+* classic ui: add xml output to avail.cgi for direct source of jasper reports #1712
+* classic ui: add combined view of all unhandled hosts and services including the multiple command dropdowns for each (initial idea by Thruk) #1328
+* classic ui: add "link to this page" to all cgis #1783
+* classic ui: add export icons instead of "export to..." text on cgis supporting it (csv, json, xml, link) #1789
+* classic ui: add highlight_table_rows to status.cgi, can be disabled via cfg option #1777
+
+* idoutils: add update-version-schema for updating the idoutils db schema versions automagically, independant of update-version #1616
+* idoutils: dump multiline mbufs as bulk inserts #1110
+	** configfile/runtime variables, host contacts/parents, service contacts, timeranges, host/service/contactgroup memebers
+	** oracle uses bulk arrays binded on prepared insert statements
+* idoutils: remove host and service checks from default data_processing_options as they are not used by icinga-web #1757
+* idoutils: Add logging of bind variable value for oracle #1314
+* idoutils: oracle change perfdata columns to clob #1749
+* idoutils: oracle: change logentry_data type to clob #1750
+
+* install: add --with-p1-file-dir allowing custom location (default is now $libdir instead of $bindir) #1569
+	** only when embedded perl is enabled
+	** affects (new_)mini_epn and icinga.cfg
+* install: add configure option to set log dir and cgi log dir and phpapi log dir #1715
+	** e.g. --with-phpapi-log-dir=/var/log/icinga/api --with-log-dir=/var/log/icinga --with-cgi-log-dir=/var/log/icinga/gui
+	** apache user permissions
+* install: after daemon stop in init script, retry and then issue a kill -9 on the daemon #1747
+
+* config: add easy-to-use config examples and scripts for notifications #1697
+	** advanced notify-by-email
+	** notify-by-jabber, notify-by-twitter examples
+* config: add check_dummy command definitions as example to commands.cfg #1719
+* config: tune icinga.cfg for performance, enable_environment_macros=0, enable_embedded_perl=0 by default #1635
+
+* style: add new ident tools #1617
+
+FIXES
+* core: remove duplicated unlinks for check result files with multiple results (Ton Voon) #1615
+* core: fix retain status file over an init script reload #1579
+* core: fix freshness_threshold problem in host checks by using check_interval in HARD or OK state, else retry_interval (like service checks) (Andreas Ericsson) #1331
+* core: make command_check_interval=-1 equal to 5s instead of 60s, targetting as often as possible (Andreas Ericsson) #1651
+* core: fix problem where acknowledgements were getting reset when a hard state change occurred (Ton Voon) #1618
+* core: avoid using global macros when sending notifications (Andreas Ericsson) #1653
+* core: avoid sending notifications to the wrong contact (Andreas Ericsson) #1654
+* core: try to avoid a single check being reaped multiple times (Andreas Ericsson) #1652
+* core: Fix typo in configure.in preventing compilation on FreeBSD (thanks sag47) #1732
+* core: plug memory leak with display_name on start/reload #1841
+* core: fix content of macro $NOTIFICATIONRECIPIENTS$ grows and grows #1695
+
+* classic ui: fix cross site scripting vulnerability in config.cgi on config expander arguments #1605
+* classic ui: better handling of writing to cgi.log in cmd.cgi #1161
+* classic ui: fixing tac.cgi header problems with counting and adding pending and descriptions #1505 #1506 #1508
+* classic ui: corrected behaviour of pending states in tac header #1508
+* classic ui: fix counting for services in tac header is wrong #1508
+* classic ui: remove sidebar.html inclusion in index.html causing troubles on reload #1632
+* classic ui: fixed: User can execute host/servicegroup commands even if not authorized for (Sven Nierlein) #1679
+* classic ui: fixed: plugin_output_short didn't get checked properly and caused segfault in status.cgi #1673
+* classic ui: fixed: submitting non existent host/service on avail.cgi causes segfault #1700
+* classic ui: fixed: Alert History State filter for HARD/SOFT state not working (Lennart Betz) #1722
+* classic ui: fixed: jquery 1.5.2 triggers memory leak in IE #1740
+* classic ui: fixed: ssi files don't get included if icinga path contains uppercase letters #1716
+
+* idoutils: do not update start_time of already started downtimes #1658
+* idoutils: fix started downtime update for table scheduleddowntime in oracle #1658
+* idoutils: remove leftover socket file in init-script startup, e.g. from a system crash #1745
+* idoutils: simplify ido2db_get_object_id oracle function #1655
+* idoutils: fix oracle long_output column in eventhandlers missed #1748
+* idoutils: fix oracle ocilib 3.9.2+ fixes causing wrong 4byte->8Byte casts #1751
+* idoutils: fix ORA-00600 while executing merge #1362
+
+* install: fix event handlers cmd file location in contrib #1501
+* install: icinga.spec should not provide nagios version #1562
+* install: don't include git meta data in upstream tarballs #1562
+* install: fix make install-idoutils overwrites sample - adding idoutils.cfg-sample instead #1625
+* install: fix icinga.cmd and log dir replacement in icinga-api aubmodule #1573 #1715
+* install: fix DEBUG_LOG_PATH in p1.pl, will now be using configurable log-dir #1715
+* install: do not overwrite config in make fullinstall #1754
+* install: fix configure should tell if ocilib or libdbi if idoutils enabled in summary #1780
+
+* config: deprecate log_external_commands_user #1619
+
+CHANGES
+https://wiki.icinga.org/display/Dev/Changes
+
+* location of p1.pl is now default in %{_libdir}/icinga instead of %{_bindir}/icinga: configure flag for pkg --with-p1-file-dir=
+* new notification examples: contrib/notifications/* sample-config/template-object/notifications.cfg
+* eventhandlers got their proper icinga.cmd location through configure
+* p1.pl.in will be created from configure into p1.pl
+* module/idoutils/config/idoutils.cfg-sample is now installed instead of idoutils.cfg
+* add log dir options for core, cgi and phpapi log
+	** --with-log-dir=%{logdir} --with-cgi-log-dir=%{logdir}/gui --with-phpapi-log-dir=%{logdir}/api
+	** p1.pl DEBUG_LOG_PATH is replaced
+	** icinga.cfg logdir, archive, debug_file uses &nbsp;(LOGDIR) ac macro
+	** cgi.cfg cgi logfir, archive uses &nbsp;(CGILOGDIR) ac macro
+	** phpapi log and icinga.cmd target are overwritten by core configure in their places
+	** ownership of cgi and api log dirs is apache user and group
+* cgi.cfg config changes
+	** cgi_log_file=@CGILOGDIR@/icinga-cgi.log cgi_log_archive_path=@CGILOGDIR@
+	** show_partial_hostgroups=0 default_downtime_duration=7200 suppress_maintenance_downtime=0
+        ** authorized_contactgroup_for_all_hosts, authorized_contactgroup_for_all_services, authorized_contactgroup_for_system_information,
+        ** authorized_contactgroup_for_configuration_information, authorized_contactgroup_for_all_host_commands,
+        ** authorized_contactgroup_for_all_service_commands, authorized_contactgroup_for_system_commands, authorized_contactgroup_for_read_only
+	** highlight_table_rows
+* icinga.cfg config changes
+	** log_archive_path=@LOGDIR@/archives p1_file=@P1FILELOC@/p1.pl debug_file=@LOGDIR@/icinga.debug
+	** enable_embedded_perl=0 enable_environment_macros=0
+* idomod.cfg config changes
+	** data_processing_options=67108669
+
+
+1.4.0 - 11/05/2011
+
+ENHANCEMENTS
+* core: re-allow perfdata with empty results being put on perfdata channel, disable via opt-in cfg option #1413
+* core: add downtime delete commands made "distributable" by deleting by host group name, host name or start time/comment (Opsview team) #1344
+* core: add 'module' as object config, allowing cfg_dir usage loading multiple modules without touching broker_module in icinga.cfg #162
+
+* classic ui: merged reading of logfiles into one function. It's easier now to add enhancements. #972
+* classic ui: Adding some more icons to showlog.cgi #1239
+* classic ui: adding entry time of comments in tooltip's in status.cgi #1244
+* classic ui: Searching in the Icinga Logfile #516
+* classic ui: changed print_generic_error() function to support csv output #1270
+* classic ui: Added parameter to get_log_entries() function to use beginning and end timestamp #1271
+* classic ui: Show downtime in host detail and service detail view #1141
+* classic ui: Store cmd.cgi submissions in log #1161
+* classic ui: enforce a need for comment for action taken in cmd.cgi #610
+* classic ui: Add config option to set start of week (sunday/monday) #1269
+* classic ui: Allow display of Network Outages for authorized hosts #1320 (thx mjbrooks)
+* classic ui: remove useless memory allocation when reading logfiles reverse (lifo) #1387
+* classic ui: speed up data processing in summary.cgi #1392
+* classic ui: Add an alternative CGI driven view for the top frame (Matthew Brooks) #1406
+	** hosts/services counts with active unack, passiv unack, acked, totals (title tooltip)
+	** performance information on the right
+	** added urls and appropriate url filters
+* classic ui: Added json output "&jsonoutput" to nearly all pages in classic ui #1217
+* classic ui: allow searching for host display_name normal and via regexp #1393
+* classic ui: display host/service dependencies in host/service details in extinfo.cgi #1300
+* classic ui: add module object definition for viewing with config.cgi including csv+json output #162
+
+* idoutils: add db socket as config option in ido2db.cfg for mysql and postgresql #1107
+* idoutils: reduce housekeeping cycle to every 3600s, set housekeeping thread startup delay to 300s #1157
+* idoutils: introduce schema version and check against that instead of program version #1368
+* idoutils: install sample (commented) config in modules/idoutils.cfg using new 'module' object config #162
+* idoutils: add configure flag to set ido instance_name other than 'default' in idomod.cfg #1167
+
+* config: increase default debug file size to 100M #1316
+
+* install: add --with-ext-cmd-file-dir= to configure, allowing icinga.cmd dir to be altered #1268
+* install: add make option to install doxygen development docu "install-dev-docu" #1309
+
+
+FIXES
+* core: fix flexible downtime on service hard state change doesn't get triggered/activated #1128
+* core: fix timeperiods daylight saving time problem (Luca Di Stefano) #1370
+* core: do not update host/service status during scheduler initialization on startup #1741
+* core: do not dump retained host state states to neb modules, re-enable via dump_retained_host_service_states_to_neb #1742
+
+* classic ui: Fixing tooltip's in status.cgi, not showing messages with carriage return #1244
+* classic ui: fixed csv export link to make it XSS save (IE) #1275
+* classic ui: cmd.cgi: acknowledgement multiline comment -> command not being processed #1257
+* classic ui: statusmap.cgi: fixed XSS vulnerability #1281
+* classic ui: fix display_name survive reconfiguration and is use instead of host_name in classic ui #1282
+* classic ui: don't show pause/continue urls on non-refreshable pages
+* classic ui: fix segfaults if no default_user_name= given in cgi.cfg #1289
+* classic ui: Prevent statusmap.cgi markup from drawing when host should not be drawn (Matthew Brooks) #1383
+
+* idoutils: update oracle hints in ido2db.cfg with tnsnames.ora and port cfg #1283
+* idoutils: idomod: larger buffer size (by Opsview) #1286
+* idoutils: fix rdbms deconnect after connection error #1313
+* idoutils: fix race condition when issueing multiple reloads results in hanging IDO2DB processes #1410
+* idoutils: fix postgresql: integer not big enough for bytes_processed (Stig Sandbeck) #1401
+
+* install: use *.so instead of *.o for solaris, patch in contrib/solaris/ #524
+
+
+1.3.0 - 16/02/2011
+
+ENHANCEMENTS
+* classic ui: add instance hostname to html title #954
+* classic ui: use the signal-colour red more economically in tac.css stylesheet (Joachim Raber) #868
+* classic ui: add attribute based authorization based on Shibboleth (Tibor Vago, NIIF) #909
+* classic ui: add config expander urls to extinfo.cgi for active checks and eventhandlers (Jochen Bern) #965
+* classic ui: add collapse the display filter part on status.cgi #923
+* classic ui: add tabfriendly titles, enabled by default (Jochen Bern) #975
+* classic ui: add service states to annotate with current notification number opt-in (Jochen Bern) #976
+* classic ui: change displayed name for hostgroups and servicegroups in extinfo.cgi
+* classic ui: adding "Attempt" column to host status detail list
+* classic ui: change default url target frame to main #1014
+* classic ui: add url_stylesheet_path to cgi.cfg to allow custom css path #898
+* classic ui: change color of unknown/unreachable state to more warm signalling purple #1029
+* classic ui: move "add service/host comment" to the command box on extinfo.cgi, abandon remove all in favor of multiple comment delete #837
+* classic ui: add trend timeperiod feature to locate the next problem (Carsten Emde) #1074
+* classic ui: add configurable http charset support (default utf-8) within the cgis #1002
+* classic ui: add csv export to config.cgi #1052
+* classic ui: beautify and modularize error msg #1198
+
+* core: add support for same host service dependencies with servicegroups (Mathieu Gagné) #928
+* core: allow eventbroker modules to override sending notifications (Matthieu Kermagoret) #1057
+* core: allow empty hostgroup aissgments for services as opt-in config option (Max Schubert) #949
+* core: do not copy broker modules (OMD patch) #896
+* core: fix host alias saved in resention data survived reconfiguration #935
+* core: add basic dualstacked IPv6 support (core/cgi patch by Julius Kriukas, slight changes on Icinga, own IDOUtils backend code) #674
+	** address6 as host definition attribute (to be used dual stacked, address stays default!)
+	** host macro $HOSTADDRESS6$ for e.g. check-host-alive
+	** if not set, host name is set as default (same behaviour as address)
+	** shown in classic ui only if set (not matching host name)
+	** idoutils mysql/postgresql/oracle hosts config table gets new column 'address6' populated
+	** note: as of this release, idoutils depends hard on include/objects.h of icinga core. internal idomod api changed, new datatype added.
+
+* install: add sysconfig source to init script #1015
+* install: set -Wall gcc flags based on os/compiler #959
+* install: create doxygen templates and add to html/doxygen #446
+
+* idoutils: add index to table icinga_statehistory for usage in reporting module #957
+* idoutils: add check for configuration file availability for idomod and ido2db (idea from Ricardo Maraschini) #1087
+* idoutils: add cfg option to enable/disable oci errors to syslog through error handler #1060
+* idoutils: add dbversion upgrade scripts for 1.3 #633
+* idoutils: add dbversion check in ido2db and print error to syslog in case of non-matching #633
+* idoutils: do not clear host|service|scheduleddowntime status tables on core restart/reload (inspired by Opsview) #1106 #1176
+* idoutils: only insert service and host checks when they are finally processed, increase performance by replacing insert/update with single insert (idea by Opsview/Opsera Ltd with mysql and servicechecks) #1100
+	** servicechecks table is heavily used next to hostchecks
+	**- if the core does a host|service check, there are 3 situations the event broker will get data: INITIATE, ASYNC_PRECHECK, PROCESSED
+	** idomod/ido2db process INITIATE (insert) and PROCESSED (update) til now
+	** now, ido2db takes only PROCESSED with a full insert, mysql and postgres use sql standard insert, oracle a prepared statement with insert
+	** reduced number of check events sent to IDOUtils by 66%
+	** reduced number of fired SQL statements by 50%
+	** changed 1 SQL statement for each rdbms, making it smaller and saving index lookup (and virtual table by merge in oracle)
+	** index savings, and dropped unique keys - check upgrade sql scripts for mysql/postgresql/oracle
+* idoutils: add indexes for logentries, preventing heavy load #1055
+* idoutils: enable max_logentries_age & max_acknowledgements_age with 31 days for cleaning by default in ido2db.cfg #1155
+* idoutils: add multi valued inserts for host|service_contacts instead of single insert/update loops (thx Opsview) #1108
+
+* contrib: bring daemonchk.cgi building into shape (Elan Ruusamäe) #1051
+
+
+FIXES
+* core: base/utils: Refactor my_fcopy() (Andreas Ericsson) #427
+* core: base/nebmods: Replace local file-copy hack with my_fdcopy() (Andreas Ericsson) #424
+* core: force my_free() macro users to end the statement with a semi-colon (Andreas Ericsson) #927
+* core: fix problem with extra whitespace in command definition and ePN (Jason Young) #918
+* core: fix NOTIFICATIONTYPE MACRO never became CUSTOM (Alexey Dvoryanchikov) #950
+* core: only catch SIGSEGV if we're not dumping core and running as a daemon #457
+* core: protect against callbacks removing themsevles in nebmods (Andreas Ericsson) #1021
+* core: fix possible validation error with empty hostgroups/servicegroups (Sven-Göran Bergh) #1040
+* core: performance-data handling and checking is now thread-safe so long as embedded perl is not used (Andreas Ericsson) #1022
+* core: children should no longer hang on mutex locks held in parent for localtime() (and similar) calls (Andreas Ericsson) #1039
+* core: debug logging is now properly serialized, using soft-locking with a timeout of 150 milliseconds to avoid multiple threads competing for the privilege to write debug info (Andreas Ericsson) #1035
+* core: fix parsing of long plugin output for async host checks (Jochen Bern) #1046
+* core: log error reason when failing to open the status file (Andreas Ericsson) #1078
+* core: fix allocate memory once for *GROUPMEMBERS macros (Stephane Lapie) #1076
+* core: protect against poorly behaving thread-libraries (Andreas Ericsson) #1080
+* core: fix extraneous alerts for services when host is down (Ton Voon) #1097
+* core: reduce duplication of code for is_contact_member_of_contactgroup (Stephen Gran) #1126
+* core: fix bug with passive host checks being incorrectly sent to event brokers as active checks (Ethan Galstad) #1133
+* core: fix bug where passive host check status updates were not being propagated to event brokers (Ethan Galstad) #1134
+* core: fix first_notification_delay logic (GalaxyMaster) #1145
+* core: fix race condition on flexible downtime commands when duration not set or zero #1061
+
+* classic ui: change servicestatus letter color to default black, not grey #946
+* classic ui: fix waste of cpu in status summary (TomTom) #933
+* classic ui: fix config.cgi start page wrong "command cxpansion" url (Alexey Dvoryanchikov) #951
+* classic ui: do not allow url_encode returning empty string on Solaris (Ethan Galstad, Ton Voon) #924
+* classic ui: fix object values in utf8 are displayed incorrectly in the web interface (Alexey Dvoryanchikov) #952
+* classic ui: make html header w3c conform #952
+* classic ui: fix typo for css attribute in extinfo.cgi (Ton Voon) #963
+* classic ui: fix whitespace escaping in html urls (Jochen Bern) #965
+* classic ui: fix config expander printing [SP] instead of [WS] (Jochen Bern) #965
+* classic ui: fix status totals - incoherence between displayed list and values #993
+* classic ui: fix deleting host comments won't work #994
+* classic ui: changed naming of cgi config options for showlog_current_state(s) and showlog_current_state(s) #899
+* classic ui: fix form/table DOM confusion in cgis (Sven-Göran Bergh) #1081
+* classic ui: fix tac.cgi with incorrect links to filtered host details (Yannick Charton) #1065
+* classic ui: fix missing html label/text for searchbox () #John Giacalone #1114
+* classic ui: fix authorized_for_read_only can execute command over the status.cgi #1154
+
+* install: fix LD_LIBRARY_PATH export on non bash in idoutils init script (Alexander Skwar) #936
+* install: add log2ido for adding archived logs onto socket/rdbms #926
+* install: add hint to configure that libpq is not yet fully working #622
+
+* idoutils: fix unescape display name (Matthieu Kermagoret) #1027
+* idoutils: fix solaris <= lacks asprintf (Julian Wiesner) #1048
+* idoutils: fix unfreed oci handles in prepared statements #1093
+* idoutils: increase debugoutput for conversion functions #1094
+* idoutils: fix libdbi 0.8.3 deprecated functions dbi_result_get_(u)long #559
+* idoutils: fix after core restart/reload on oracle db ORA-01403: no data found #1059
+* idoutils: fix string escaping for backslashes in postgresql #1121
+* idoutils: fix check for empty command args in host|service|notification definitions #1047
+
+
+1.2.1 - 25/10/2010
+
+ENHANCEMENTS:
+* core: fix initscript, no error when stopping stale lock (OMD patch) #897
+
+* classic ui: Added config options to hide initial state and current state log entries in showlog.cgi #899
+* classic ui: extinfo comment table cell names (Oliver Graf) #861
+* classic ui: add csv export to avail.cgi (single|all hosts|services|servicegroups|hostgroups) #925
+
+
+FIXES:
+* core: corrected wrong implementation of fix #584 - re notification for downtime after icinga restart
+* core: fix epn tag for disabling ePN (Yannick Charton) #914
+* core: fix snprintf in make for Solaris #858
+* core: fix config file parsing end of definition check #913
+* core: fix ignoring empty definitions, only warn #860
+
+* classic ui: fix for "Schedule a check of all services on this host" not working properly #895
+* classic ui: comment tooltip now show's quotes and back slashes #907
+* classic ui: fix change statusmap logo name to icinga #922
+* classic ui: add support for ICINGA_ env vars for cgis #921
+
+* idoutils: fix disconnecting on errors misbheaving, not closing db and daemon #886
+
+
+1.2.0 - 06/10/2010
+
+ENHANCEMENTS
+* core: add eventhandler override (Sven Nierlein) #731
+* core: add config option to disable logging into the daemon log file #311
+* core: fix delay sorting of comments/downtimes (Ton Voon) #753
+* core: fix custom macros being cleaned/stripped (as they are user-defined and should be trusted) (Peter Morch) #752
+* core: add the possibility to use * as a wildcard for all hosts in servicegroup definition #813
+* core: fix scheduled downtime notifications resent on restart/reload #584
+* core: disable eventprofiler on Solaris gcc3, preventing core dumps #702 #572
+
+* classic ui: add commands expander to config display (Jochen Bern) #746
+	- $ARGn$ substitution will be shown between command_line and
+	  check_command associated for hosts, services, etc and help
+	  getting to know/use commands the core will execute.
+* classic ui: change menu, add unhandled host/service problems #745
+* classic ui: reduce line-height of menu items (Martin F. Krafft) #833
+* classic ui: allow searching for host without service attached to it #601
+* classic ui: added tooltip for comments in status.cgi #805
+* classic ui: remove php dependency by dropping extended live search #800
+* classic ui: added csv export to most cgi pages #806
+* classic ui: added possibility to delete multiple downtimes and comments (taken loads of ideas from Rune Darrud) #523
+* classic ui: Beautifying the design of submit form in cmd.cgi and everything else in cmd.cgi #804
+
+
+FIXES
+* core: fix send comments to the broker with proper expiration_time (Matthieu Kermagoret) #747
+* core: fix segfault in escalation conditions when using object tricks (Vitali Voroth) #751
+* core: fix for retaining host display name and alias, as well as service display name (Folkert van Heusden) #760
+* core: fix format errors for logging eventhandlers (Guillaume Rousse) #779
+* core: remove program update checks as scheduled timed events, not written to status/retention.dat anymore #790
+* core: don't skip hostchecks when servicechecks are disabled (Stephen Gran) #778
+* core: move eventprofiler init after config parsing, checking if enabled, making it optional all over #572 #702
+
+* classic ui: update jquery for multiple cmds dropdown, resolve conflicts with pnp #807
+* classic ui: moved individual document_header and document_footer to cgiutils.c, distinction by cgi_id #808
+* classic ui: removed double header in tac.c #808
+* classic ui: changed size of checkbox column to 16 #809
+* classic ui: remove useless utils.inc.php since check-program-updates is dropped from core #800
+* classic ui: fix status.cgi segfault without hostgroup parameter on solaris 10 #594
+* classic ui: drop dead code on cgis (check_daemon_running)
+* classic ui: avoid the horizontal scroll bar at the bottom of the menu (Yannick Charton) #835
+
+* idoutils: fix ido2db forking if database connection failed, now immediately disconnecting the client #773
+* idoutils: fix database port in ido2db.cfg not honoured using libdbi #825
+
+* install: remove php dependency and files for updatechecks/extended search in icinga.spec #800
+* install: add mkdir -p for HTTPDCONF directory creation instead of install -D (misses on Unix) #802
+* install: remove installing from ido2db init script from Makefile when installing idoutils #814
+* install: better ssl detection in solaris when /usr/local/ssl used for --with-ssl #821
+* install: replace echo -n by printf in init scripts (Lars Engels) #834
+
+* config: fix typo preserve_state_information in description of retention file
+
+
+
+1.0.3 - 18/08/2010
+
+ENHANCEMENTS
+* core: new config option to set initial state of persistence for acknowledgements
+* core: add opt-in log_external_commands_user in icinga.cfg, user will be logged by the core if enabled and sent through icinga.cmd
+* core: add config option to disable the logging of current state in log after rotation (Ricardo Bartels)
+* core: add config option to log long plugin output (Ricardo Bartels)
+* core: add config option to enable event handlers for stalked hosts/services (Petya Kohts)
+* core: scheduled downtime can now start on SOFT error states
+
+* idoutils: add syslog output for start/stop, client connecting
+* idoutils: add db trimming thread startup delay config option
+
+* classic ui: cgi config option to show long_plugin_output in status.cgi (Ricardo Bartels)
+* classic ui: add config option to only show HARD states in tac.cgi
+* classic ui: add multiple selection/command sending to host/service status page
+	- added extra column in host and service status with checkboxes using jquery
+	- It is now possible to check off the hosts you want to send commands to Icinga.
+	- Ex: schedule downtime for a custom selection of hosts or X number of services.
+* classic ui: add a pause/continue update button (main parts by Steve Koenig)
+	- affects status.cgi and allows to select and run commands w/o page reload
+
+FIXES
+* core: fix temp_path overwritten by check_result_path in base/config.c
+* core: modify execv to execvp, accepting 4096 cmd args, for both host and service checks with adapted error handling
+* core: execvp searches in PATH too like popen, and returns if error, outputting the errno string
+* core: fix possible overflows and increase command length limit in mini_epn's (Thomas Guyot-Sionnest)
+* core: fix new_mini_epn to allow any command line length without breaking on extra trailing or leading whitespace (Ray Bengen)
+* core: fix wrong is_volatile conditions causing wrong service alerts in the logs
+* core: fix notify-service-by-email command from the stock template cuts off service check output
+* core: fix service checks should recognize that exit code 126 means plugin is not executable
+* core: fix service event handlers when service problem becomes hard during host down
+* core: fix service in soft state after hard state without recovery
+* core: fix all comments disappear after restart if one user comment is non-persistent (Ricardo Bartels)
+* core: fix macro processing (Jochen Bern)
+* core: fix non-scheduled hosts/services not being updated in IDO*
+* core: move the malloc block in insert_skiplist below dupcheck to avoid memory leaks (Thomas Guyot-Sionnest, Holger Weiss)
+* core: fix missing variable reset for use_syslog_local_facility and syslog_local_facility
+
+* classic ui: fix image urls in stylesheets
+* classic ui: remove check_daemon_running, remains useless
+* classic ui: fix multiurl action/status icon wrong name
+* classic ui: cmd.cgi "his" instead of "its" in command description
+* classic ui: fix customers can see machines from other customers when entering a downtime
+* classic ui: fix invalid pointer in extinfo.cgi type=7
+* classic ui: for new Splunk integration query parameters
+* classic ui: fix for incorrect host state counts in status CGI when viewing servicegroups
+* classic ui: fix for extra colum in CSV export
+
+* install: fix api not installed using make install-unstripped
+* install: enable debuginfo in spec file
+* install: remove daemonchk.cgi from init-script
+* install: improve output of rhel init-script
+* install: add config checks for start, reload and restart on rhel init script
+* install: fix duplicated configcheck on restart in init-script
+* install: fix specfile for idoutils description
+* install: fix Makefile output if Icinga API not available
+* install: fix t/ and daemon-ini-redhat in distclean
+* install: add note about api installed successfully
+
+
+* idoutils: adapt oracle-drop.sql for current schema
+* idoutils: fix binding null values to name1/name2 in oracle
+* idoutils: fix typo in servicedepencies query for oracle
+* idoutils: fix oracle prep statement contactnotifmethoddata
+* idoutils: full rewrite of binding NULL values for oracle with ocilib
+* idoutils: change display_name to varchar(255) for mysql/oracle
+* idoutils: update pgsql schema, replace varchar(n) by text
+* idoutils: change configfilevariables varvalue to 1024 length for mysql/oracle
+
+1.0.2 - 30/06/2010
+
+ENHANCEMENTS
+* core: init script shows config errors option; don't remove pidfile if icinga did not stop in a timely manner
+* core: check if icinga running before starting; if died remove lockfile first
+* core: add in sync retention facility (Ton Voon, Opsera Ltd)
+* core: add new is_volatile setting of 2 for services, which respects the re-notification interval for notifications (Ton Voon)
+* core: add Icinga option -S functions much like -s but will dump the entire scheduling queue is it would run,
+        in addition to providing the summary data (Steven (Steven D. Morrey)
+* core: icinga can send log messages to syslogd using a local facility instead of the default one
+* core: enhanced diagnostic output when a regular expression fails to compile (Max Schubert)
+* core: add state-based escalation ranges (Mark Gius)
+        The directives first_notification and last_notification apply to the
+        total count of notifications on a particular service or host.  It is
+        sometimes desirable to escalate after the Nth critical notification,
+        rather than after a total number of N notifications have been sent.
+	NOTE: This can be enabled through configure, it is currently incompaitble with mk_livestatus!
+* core: add event profiling option for stats of event counts and time taken for events
+* core: retention file loading speedup (Matthieu Kermagoret)
+
+* cgi: add opt-in display_name from hosts/services definitions; if set, they will be shown in the classical ui
+* cgi: re-add quick search to navmenu in order to provide quick host/service lookups without idoutils/api
+* cgi: add event profiling stats of event counts and time taken for events in 'Performance Info'
+* cgi: add config option show_all_services_host_is_authorized_for to cgi.cfg
+	It's possible to disable that the user can see all services only being an authorized contact for the host
+* cgi: add multiple urls for notes|action_url on host|service object definition (Jochen Bernd)
+
+* idoutils: add config options to allow users decision on clearing realtime and config tables on Icinga core startup
+	Actual config objects are marked as (in)active, because disabling the clearing results in historical config
+* idoutils: remove mysql binary selects, use case-sensitive collation instead (William Preston)
+* idoutils: Spread the list of linked lists thinner (extend objects hash slots) (Opsera Ltd)
+* idoutils: change select * into select [*_]id if unused results
+* idoutils: add syslog output, if ido2db is unable to do initial db query
+* idoutils: rewrite initscript not only depending on lockfile
+* idoutils: check if ido2db running before starting; if died remove lockfile first
+* idoutils: add upgrade scripts to fix object relations to historical data
+
+* config: add trailing slash in apache config for html dir
+
+FIXES
+* core: fix scheduling downtime for all services AND the host (cgi url, external commands)
+* core: fix custom notifications being sent during downtimes (Sven Nierlein)
+* core: fix spurious dollar signs added to command_lines (Alexander Wirt)
+* core: fix for choosing next valid time on day of DST change when clocks go one hour backwards (Ton Voon)
+* core: fix for nagios now erroring when "Error: Could not find any contactgroup matching..." displayed (Ton Voon)
+* core: minor cleanups to icingastats.c (Eric Sesterhenn)
+* core: remove dead code (Andreas Ericsson)
+* core: introduce common/shared.c and include/shared.h (Andreas Ericsson)
+* core: move cgiutils.h compile time option macros to config.h (Andreas Ericsson)
+* core: icinga.c: remove conditional main() configuration (Andreas Ericsson)
+* core: icinga.c: replace asprintf() + write_to_logs_and_console() with logit() (Andreas Ericsson)
+* core: revamp logging somewhat (Andreas Ericsson)
+* core: create logging.h, with stubs for the common function in cgiutils.c (Andreas Ericsson)
+* core: Janitor patch: Remove unused variables (Andreas Ericsson)
+* core: base/utils.c: typo-fix s/escape_newlines==/escape_newlines_please==/ (Andreas Ericsson)
+* core: cgi/cmd.c: Squelch warning about empty gnu_printf format string  (Andreas Ericsson)
+* core: more linker tricks and less #ifdef's - log_debug_info() stubbed (Andreas Ericsson)
+* core: common/objects.c: Use calloc() instead of malloc() + manual NULL'ing (Andreas Ericsson)
+* core: macros: Protect against typos in macro names (Andreas Ericsson)
+* core: macros: Add NOTIFICATIONISESCALATED to the list of macro names (Marc Powell)
+* core: comments: Remove one comment at a time from hashlist (Hiren Patel)
+* core: fix checking of the open(2) system call (David Glick)
+* core: xodtemplate: Use macro magic to get rid of 900 LoC (Andreas Ericsson)
+* core: more s/malloc(size) + init/calloc(1, size)/ replacements (Andreas Ericsson)
+* core: header files: Remove dead prototypes (Andreas Ericsson)
+* core: base/commands.c: Fix error path of opening checkresult files (Andreas Ericsson)
+* core: fix open() error checking in move_check_result_to_queue() (Andreas Ericsson)
+* core: xdata/xpddefault.c: Close perfdata files if fd's are >= 0 (Andreas Ericsson)
+* core: fix xpddefault_{host,service}_perfdata_file_pipe not set properly on configuration re-read
+* core: fix SIGSEGV in checks.c on Solaris (Torsten Huebler)
+* core: added icinga object version variable in neb api for usage with idomod
+* core: fix notification_period inheritance for services (Gordon Messmer)
+* core: fix for notifications not being sent out when scheduled downtime is cancelled (Daniel Pouzzner)
+* core: fix for first notification delay being calculated incorrectly, and notifications potentially going out early (reported by Pawel Malachowski)(Ethan Galstad)
+* core: error out if services defined without description in service object definition (service def and/or used templates)
+* core: fix servicechecks with timeperiods containing 'exclude' directives are incorrectly re-scheduled
+
+* cgi: minor cleanups to cgiutils.c (Eric Sesterhenn)
+* cgi: fix cmd.cgi incomplete output for command description
+* cgi: fix typo: "stye" instead of "style" in cgi/tac.c
+* cgi: check_daemon_running() not working on MacOS (Hendrik Baecker)
+* cgi: fix CGIs don't show correct error on missing archived icinga-DATE.log file
+* cgi: fix missing js files
+
+* idoutils: Host DB inserts use string 'NULL\n' instead of NULL (William Preston)
+* idoutils: ndo2db_get_object_id fails to return existing IDs (William Preston)
+* idoutils: fix postgres wrong type in service_object_id
+* idoutils: modify string escaping again (mysql, pgsql), needs a full rewrite though
+* idoutils: fix for oracle when binding a NULL value on contactnotificationmethods
+* idoutils: completely renamed idoutils (s/ndo/ido/g etc), removing old sources
+* idoutils: fix compilation error of SUN_LEN on Solaris
+* idoutils: add configure check for gethostbyname including -nsl on Solaris (Alexander Skwar)
+* idoutils: fix host 2d y coord not stored properly
+
+1.0.1 - 03/03/2010
+
+ENHANCEMENTS
+* core: updated docs
+* core: fix config parsing for icinga_user and icinga_group
+* core: fix status.dat ok, no daemon running, show error instead of old data
+* core: permanently remove sleep on run_event == FALSE in main loop (Max Schubert)
+
+* core: add service_check_timeout_state	configuration variable
+	This setting determines the state Icinga will report when a
+	service check times out - it does not respond within
+	service_check_timeout seconds.
+	c - Critical (default)
+	u - Unknown
+	w - Warning
+	o - OK
+
+* core: add escalation_condition definition (Vitali Voroth DECOIT GmbH)
+	The escalation_condition option is completely optional and can be
+	defined for host escalations as well as for service escalations.
+	escalation_condition <condition> ( [ & / | ] <condition> )*
+	where <condition> is either host hostname = [u,d,o] or
+	service hostname.service_description] = [w,u,c,o].
+	The escalation_condition accepts a list of one or more conditions
+	separated by & (logical AND) or | (logical OR).
+	w = WARNING
+	u = UNKNOWN
+	c = CRITICAL
+	o = OK for services or UP for hosts
+	d = DOWN for hosts
+
+* idoutils: add ido2db threaded housekeeper
+	- periodic cleanup will now be performed in own thread
+	- startup blocking behavior removed
+	- housekeeper will wait for idomod instance, idle wait using und db_hello
+	- creates own db connection and does its job
+
+* idoutils: add indexes for delete/select statements
+	- delete/select will perform faster
+	- getting cached objects with select runs faster
+	- getting logentries within icinga-web is faster
+
+* idoutils: reorganize db setup files for MySQL/Postgresql/Oracle
+	- module/idoutils/db/<rdbms>/ holds needed files
+	- module/idoutils/scripts/ with installdb/upgradedb for MySQL
+	- updated Makefile, README
+
+* idoutils: complete oracle rewrite to improve performance
+	- query rewrite
+		- 1x SELECT latest data time as is (called only at startup)
+		- dynamic binded procedure for DELETE on table by instance_id called at startup
+		  for cleaning config/status
+		- dynamic binded procedure for DELETE on tably by instance_id, field<time called
+		  during periodic cleanup in threaded housekeeper
+		- all other queries are prepared with their own statement handler
+			 4x DELETE
+			 52x MERGE
+			 9x INSERT
+			 9x UPDATE
+			 5x SELECT
+	- rewritten getting cached object_id using select
+	- all queries use binded unixtimestamp instead of prepared query string
+	- removed autoincrement sequence and insert triggers to update primary key
+	- added sequence for each table
+	- INSERT INTO ... (id, ...) VALUES (seq_name.nextval, ...) will do the trick
+	- added RETURNING id INTO :id for INSERT statements to save one round trip
+	- MERGE does not support returning INTO, added SELECT seq_name.currval query instead
+	  for fetching last inserted id
+	- add explizit upgrade information and provided procedure to alter sequence start
+	  when importing data (check oracle-upgrade-1.0.1.sql for more info)
+
+* idoutils: add upgrade path for mysql/pgsql/oracle for 1.0.1
+* idoutils: add initial debug output for idomod (to be set in idomod.cfg)
+* idoutils: add database name in connection msg to syslog
+* idoutils: change mysql db engine to innodb (no table locking, better transcations)
+* idoutils: add --with-oracle-lib=/path/to/instantclient for runtime export of
+	LD_LIBRARY_PATH if instantclient not installed to path
+* idoutils: add max_logentries_age and max_acknowledgements_age to ido2db (check ido2db.cfg)
+
+FIXES
+
+* core: fix segfault in cmd.cgi
+* core: fix event broker callback function self de-registering for callbacks (Sean Millichamp)
+* core: add missing sound.js provided by scriptaculous
+* core: string replaces for icinga
+* core: typo fix in mrtg.cfg (Dennis van Zuijlekom)
+* core: add init info as required by LSB
+* core: fix perl tests
+* core: fix missing clean & distclean against tap/ directory
+* core: fix several libtap c TAP tests and cleanups
+* core: refactor perl test to use icingaadmin
+* core: add cgi argument 'nodaemoncheck' and tests
+* core: add config.cgi test
+* core: add subtests to extinfo tests
+* core: add tests against histogram.cgi
+* core: add $srcdir to paths
+* core: fix idomod doesn't de-initialize after config error
+* core: fix make fullinstall/idoutils without enabled idoutils during configure
+* core: fix sending two identical service_status events to neb module
+* core: fix segmentation fault crash when a non-existant host or service is passed to the command pipe
+* core: add check for NULL for event_list_high
+
+* idoutils: modify string escaping for mysql and pgsql
+* idoutils: fix pgsql table systemcommands (missing column 'output')
+* idoutils: fix arraysize of es in save_custom_variables
+* idoutils: rename ndomod.h to idomod.h
+* idoutils: fix several naming issues
+* idoutils: fix acknowledgments query, wrong buffer freed/set as query to db (Bruce Pennypacker)
+* idoutils: fix contactnotification data array, command args were not provided (Bruce Pennypacker)
+* idoutils: fix custom_variables object_id type int => unsigned long
+
+
+1.0 Stable - 16/12/2009
+* core: create webserver conf.d dir if not existing
+* core: output the correct config parameter name on error message
+* core: run dos2unix on spec file
+* core: check /proc/$pid instead of lock file while waiting for shutdown
+* core: fix cgi/config.c typo
+* core: fix typo in cgi/cmd.c
+* core: applied nagios patches after 3.2.0
+
+* idoutils: change default data_processing_options in idomod.cfg
+* idoutils: fix missing query arguments in servicecheck query
+* idoutils: fix thisversion and perl path generation in db install scripts
+* idoutils: change db README to docs.icinga.org
+* idoutils: fix wrong debug output in db_hello()
+* idoutils: fix save custom variables segfault caused by wrong char*
+* idoutils: fix duplicate rows in table servicecheck
+* idoutils: fix duplicate rows in table systemcommands, timedevents, timedeventqueue (missing unique keys)
+* idoutils: add upgrade path/sql queries for unique key failure - check the docs for upgrading information
+
+* idoutils: Oracle improvents:
+* add prepared statements for most called queries
+	- hoststatus
+	- servicestatus
+	- hostchecks
+	- servicechecks
+	- timedevents*
+	- contact_notificationcommands
+	- programstatus
+* modify data[] to get unixtimestamps only
+* rewrite prepared statement queries to use SELECT unixts2date(unixtimestamp) FROM DUAL
+* allow rebinding of params in prepared statement for multi execution
+* prepared statement at db init
+* bind params the correct way
+* execute binded statement query instead of plain MERGE statement
+* code is now the same as NDOUtils Oracle, but with
+	- better code base (actual NDOUtils code)
+	- long_output
+	- SSL support
+	- better library: ocilib instead of own driver
+	- more prepared statements/bind param queries
+* split code into ocilib OR libdbi
+* --enable-oracle during configure decides which rdbm lib will be used
+
+
+1.0 RC - 28/10/2009
+* idoutils: add Oracle support with oclilib
+* idoutils: add ssl support
+* idoutils: add configure --enable-oracle
+* idoutils: add configure --enable-ssl
+* idoutils: add configure -with-ocilib-lib/inc for ocilib detection
+* idoutils: add oracle support to ido2db.cfg
+* idoutils: add ocilib runtime version check
+* idoutils: add ocilib linked at runtime (prevents setting of $ORACLE_HOME during configure)
+* idoutils: add ocilib hack to temp #undef CONFIG_H during compiling
+* idoutils: add #define USE_ORACLE set by --enable-oracle
+* idoutils: add #ifndef USE_ORACLE #else #endif to get code compatible with libdbi
+* idoutils: add ocilib connection, statement, resultset
+* idoutils: add ocilib execute statement, commit (no autocommit since we want to use the pros of oracle!)
+* idoutils: add ocilib insert id for sequence handling
+* idoutils: add ocilib free statement to match with sequences
+* idoutils: add oracle sysdate instead of NOW()
+* idoutils: add long_output to oracle.sql - introduce clob (Character Large Object)
+* idoutils: add even more debugoutput for oracle
+* idoutils: modify configure to use OCI_CHARSET_ANSI
+* idoutils: modify configure to set LD_LIBRARY_PATH for ido2db init script
+* idoutils: modify formatting to get more readable
+* idoutils: fix typecast bug - unsigned long is bigger then int
+* idoutils: fix oracle notif_timeperiod_object_id (30 chars max)
+* idoutils: fix oracle table serviceescalationcontactgroups (30 chars max)
+* idoutils: fix hoststatus/servicestatus/servicecheck unique constraint updating mismatch
+* idoutils: fix insert_or_update queries where update violates unique constraint
+* idoutils: remove and ignore oracle table_prefix (30 chars max)
+* idoutils: workaround to handle more than 4k Data which may exceed service outputs incl. long perf_data
+* core init: delete 'su' usage since all previously su touched files were created by the icinga user
+* idoutils: fix unescape bug during tabstops
+* idoutils: fix idomod/icinga segfault while try to use ssl on unix sockets
+* idoutils: set long_output/perfdata to TEXT in MySQL
+* core configure: set INIT_OPTS depending on detected host OS (no more root:root on FreeBSD?)
+* core spec: added new spec file
+* idoutils: fix case insensitive comparison in MySQL using BINARY
+* idoutils: change ido2db.cfg: ndo2db_[user|group] to ido2db_[user|group]
+* core web: fix missing gif icon copy
+
+
+0.8.4 - 09/15/2009
+* idoutils: fix failure_prediction_options in tables hosts, services for postgres
+* idoutils: add configure support for manual libdbi detection
+* idoutils: fix typo laste_state (wrong column)
+* idoutils: fix buffer freeing with NAGIOS_SIZEOF_ARRAY
+* idoutils: delete old mysql files coming from ndoutils
+* idoutils: add new versionhandling, idomod/ido2db now shows version of Icinga core
+* idoutils: rename existing mysql/pgsql files, added upgrade/fix files
+* idoutils: fix wrong typecast in servicestatusdata_add, no more segfault while query preparing
+* idoutils: add experimental db trimming interval option in ido2db.cfg
+* core: fix wrong copyright url for Ethan
+* docu: fix quickinstall guides
+
+
+0.8.3 - 09/02/2009
+* idoutils: add PostgreSQL support
+* new Icinga documentation in docbook and html format
+* fetch current Nagios patches
+* fix support links after make
+* idoutils: add note if install desired but not enabled
+* idoutils: fix installing of rc.ido2db in make install-idoutils
+* idoutils: add db/pgsql.sql, adapted table scheme for postgresql
+* idoutils: add time conversion functions for postgresql
+* idoutils: add try update, if affected rows=0, then insert queries for postgresql
+* idoutils: modify insert queries, normalized to sql-standard
+* idoutils: add insert-or-update functions in dbqueries.c, prepared for more rdbms
+* idoutils: modify insert-or-update queries, build data array for functions
+* idoutils: fix string escaping for postgresql
+* idoutils: fix last insert id for postgresql - needs defined sequence id for table
+* idoutils: modify command_line in commands table to varchar(1024)
+* idoutils: add more debug output
+* idoutils: Support 8192 chars of perfdata
+
+
+0.8.2 - 08/12/2009
+* create a new basic ido2db init script
+* idoutils: fix child signal handling in ido2db
+* idoutils: fix escaping of customvars before insert
+* idoutils: fix in buggy rotate command execution
+* idoutils: fix fmt specifier in ndo2db_daemonize() error
+* idoutils: added long_output support to IDOUtils
+* idoutils: Fix for not retrying read on 'EAGAIN' and 'EINTR' soft errors (Opsera Ltd)
+* idoutils: Allow externalcommands table to be trimmed with a specific time limit (Opsera Ltd)
+* icinga-api added: The search function now uses the icinga-api submodule
+* various minor changes
+
+
+0.8.1 - 06/17/2009
+------------------
+* Archived Logfiles renamed from Icinga-date-syntax.log => icinga-date-syntax.log (capital 'i')
+* cherry picked latest Nagios Patches (see Nagios Changelog below)
+* new ido2db command switch: '-f' don't daemonize the ido2db
+* ido2db will now prints out available database drivers
+* fix ido2db segfault when try to access non existing tables
+* DocBook v5 conversion
+* Fix menu frameset cols width
+
+
+0.8 - 05/19/2009
+----------------
+* Almost biggest deal to rename the components
+* including IDOUtils (former NDOUtils) into the core code,
+  updating configure & make to get in touch with it
+* changed database handling in IDOUtils from native
+  database support to libdbi (libdbi.sourceforge.net) as a
+  abstraction layer, enable compile try with
+  "configure --enable-idoutils"
+* Included a new stylesheet/icon theme based on Vautour Style
+  Vautour Style have been created by Yoann LAMY.
+  The menu of Vautour Style use the javascript framework MooTools (http://mootools.net/).
+  The icons of Vautour Style use "Silk icon set" (http://www.famfamfam.com/lab/icons/silk/) created by Mark James.
+  "Silk icon set" is licensed under Creative Commons Attribution 2.5 License (http://creativecommons.org/licenses/by/2.5/).
+
+
+
+#####################
+Nagios 3.x Change Log
+#####################
+
+This is an archived Changelog, all changes on the Icinga Core will be marked and
+referenced through issues marking on dev.icinga.org regarding their origin.
+
+Look at www.nagios.org for an actual changelog of Nagios Core.
+
+
+3.2.1 ????
+-----------------
+ENHANCEMENTS
+* Link to allow scheduling downtime for all services on a host (Hendrik Baecker)
+* Speedup to CGIs when lots of comments or downtimes in status.dat file (Jonathan Kamens)
+* Test for rw/nagios.cmd (Hendrik Baecker)
+
+FIXES
+* Fix for incorrect scheduling when time has gone back an hour (partial fix for 24x7)
+* Fix for compile on Fedora Core 3 (bug #0000082)
+* Fix for compile on Solaris
+* Fix for logging test, which was not timezone aware (bug #0000077 - Allan Clark)
+* Trivial cleanups for autoconf (Allan Clark)
+* Fix case consistency in CGI output
+* Set to search external libs, rather than include all the time (Allan Clark)
+* Fixed test compile on linux servers
+* Fixed incorrect return code in test failures
+* Create Makefile in t/
+* Added test for testing status.cgi with a large number of comments and downtime
+* Updated tests to check that comment ids are sorted
+* Fixed deferred sorting of comments and downtimes. Added tests to prove sorting
+* Fix for template configurations which use negated wildcards (Tim Wilde)
+
+WARNINGS
+
+3.2.0 - 08/12/2009
+------------------
+* Fix for read-only permissions bug in CGIs that caused problems viewing comments (bug #0000029)
+* Fix for incorrect CGI reports (availability, trends, etc.) when reporting period spans Daylight Savings Time (bug #0000046)
+* Fix for detection of truecolor support in GD library (Lars Hecking)
+* Reverted to use --datadir configure script option instead of the more recently introduced --datarootdir option
+* Status and retention files are now flushed/synced to disk to prevent incomplete information being displayed in CGIs
+* Fix for incorrect next service check time calculation when Nagios is reloaded with different timeperiod ranges
+* Updated Fedora quickstart guide to indicate PHP requirements
+* Known issue: Service checks that are defined with timeperiods that contain "exclude" directives are incorrect re-scheduled.  Don't use these for now - we'll get this fixed for 3.4
+
+
+
+3.1.2 - 06/23/2009
+------------------
+* Fix for CPU hogging in service and host check scheduling logic
+
+
+
+3.1.1 - 06/22/2009
+------------------
+* New "important check command" flag for use in service templates, to aid configuration in distributed environments
+* Fix for nagios validation error when no services defined
+* Fix for stylesheet link
+* Fix for extinfo.cgi error message when cgi.cfg doesn't exist
+* Fix for notifications.cgi where Update button on right didn't retain host information when no host= was in query parameters
+* Fix for potential bug where a contactgroup with no members could cause parsing errors
+* Fix for W3 validation for history.cgi
+* Fix for W3 validation for extinfo.cgi
+* Fix for nagiostats to return non-zero with failures in MRTG mode
+* Added t/ directory for tests. Use make test to run. Requires perl on development server
+* Fix for duplicate event_id attributes in status and retention data
+* Fix for duplicate unlink() during check processing
+* Added missing check period column to host config display (CGI)
+* Fix for embedded Perl initialization under FreeBSD
+* Fix for incorrect re-initialization of mutext after program restart
+* Fix for incorrect weighting in host flap detection logic
+* Added libtap to distribution. Use ./configure --enable-libtap to compile
+* nagios.log permissions are now kept after log rotation
+* Fix for "Max concurrent service checks (X) has been reached" messages - will now push services 5 + random(10) seconds ahead for retry
+* Fix for removing old HTML files for web frontend that are now replaced with PHP equivalents (index/main/side.html)
+* Fix for incorrect service history link text in CGIs
+* Fix for useless code loop in netutils.c
+* Fix for potential divide by zero in event scheduling code
+* Fix for trailing backslash in plugin output causing memory corruption in CGIs
+* Fix for bug that could affect host/service scheduling during clock time skew or changes to timeperod definitions between restarts
+* Leading whitespace from continuation lines in configuration files is now stripped out
+* Fix for bug where pipe (used by IPC) file descriptors get inherited by child processed (e.g. event handlers) (bug #0000026)
+* Fix for failure to daemonize - Nagios now bails (bug #0000011)
+* Fix for notifications about flapping starting not processed properly by retention data
+* Patch to add transparency to statusmap icons for truecolor images
+* Patch to add read-only permissions to extinfo CGI
+* Security fix for statuswml.cgi where arbitrary shell injection was possible
+
+
+
+3.1.0 - 01/25/2009
+------------------
+* Added automatic update check functionality - runs once a day to check for new Nagios releases
+* Splash screen on web UI now indicates whether a new update is available (requires that update checks are enabled)
+* Updates to nagiostats utility for faster execution if using external stats file
+* Added a bit more verbosity to config verification
+* Fixed bug in logging event handlers
+* Fix to prevent debug output from being shown when Nagios is compiled with embedded Perl interpreter
+* Fix for CPU hogging issues on OpenBSD
+* Fix to RPM spec file for sample configuration files
+* Fix for bug in time calculation routines that could cause notification, reporting, and check scheduling anomalies
+* Fix for scheduling forced service checks from web interface
+* Minor mods for frameset base for HTML compliance (more fixes coming soon)
+* Fix for bug in handling of hard host and service problem states during restarts that could incorrectly set current check attempt and adversely affect notifications, etc.
+* Fix for bug in timeperiod calculation of year/month rollovers and display of fixed calendar dates in web interface
+
+
+
+3.0.6 - 12/01/2008
+------------------
+* Fix for CGI submission of external commands (writing newlines and submitting service comments)
+* Fix for Apache group membership in RPM spec file
+* Fix for improper notification propagation command processing
+* Better out-of-disk-space error handling when writing retention and status files
+* Disabled adaptive check and eventhandler commands for security reasons
+* Fix for reading output from system commands (event handlers, etc) that have timed out
+* Added wildcard host matching in CGIs
+* Fixes for playing audio alerts in CGIs
+* Fix for incorrect host status links in status CGI when viewing hostgroup summary
+* Added support for x509 cert authentication in the CGIs
+
+
+
+3.0.5 - 11/04/2008
+------------------
+* Security fix for Cross Site Request Forgery (CSRF) bug reported by Tim Starling.
+* Sample audio files for CGIs removed from distribution
+* Fix for mutliline config file continuation bug
+* Minor fix to RPM spec file
+* Fix for AIX compiler warnings
+* Minor sample config file fix
+* Added documentation on CGI security issues
+
+
+
+3.0.4 - 10/15/2008
+------------------
+* Fix for properly terminating plugins when parent processes get killed (e.g. using 'killall nagios' with check_timeout plugins running)
+* Fix for event broker callback when service notifications are disabled
+* Fix for scheduling scheduling servicegroup downtime with 'hosts too' option in CGIs
+* Fix for segfault under Solaris with NULL plugin output
+* Fixes for bugs in sample event handlers - stop/start active service checks and enable notifications
+* Cosmetic fix for logging of notifications
+* Fix for high CPU utilization under OS X
+* Fix for host/service name encoding in CGIs (trends and availability reports, etc.)
+
+
+
+3.0.3 - 06/25/2008
+------------------
+* Typo fix in object config routines
+* Segfault fix in history CGI
+* Fix for bug in retention of contact notification options
+* Fix for bug in calculation of negative (month) days in timeperiod definitions
+* Fix for debug logging of notifications
+* Fix for encoding host and servicegroup names in trends and availability CGIs
+* Fix for checking for abnormal termination of host checks
+* Fix for spurious orphaned host check errors with non-scheduled hosts
+* Fix for url encoding null string in CGIs (caused status CGI segfault)
+* Fix for encoding URLs in macros
+* Fix for bug in handling of contact groups in escalation definitions
+* Changes to service check event broker logic (DNX patches)
+* Minor doc updates
+
+
+
+3.0.2 - 05/19/2008
+------------------
+* Minor bug fixes in CGIs to ensure extra host/servicegroup url strings are terminated properly
+* Minor bug fix in navigation frame link for unhandled service problems
+* Better error logging during fork() errors
+* Embedded Perl is now disabled by default
+* Fixed bug in parsing host dependencies
+* Added note to Makefile about 'make install-webconf' option
+* Fixed bug in config CGI where active host check attributes were not displayed properly
+* Fixed bug in status CGI where sounds were not played for passive service problems
+* Fixed sample script for distributed monitoring
+* Updated p1.pl to allow for 4KB lines in Perl plugin output under epn
+* Fixed bug in command for disabling contact notifications
+* Fix for bugs in host and service orphan check logic
+* Fix for 'make install' functionality for contrib directory
+* Fix for host problem links in CGI status summary view
+* Fix for properly escaping macros containing URLs
+* Patches for possible XSS vulnerability in CGIs (CVE-2007-5803) - Florian Weimer & SUSE Linux team
+
+
+
+3.0.1 - 04/01/2008
+-------------------
+* Fixed bug in trends CGI with user not being authorized for hosts/services
+* Fixed bug in status CGI with page layout messing up when sounds enabled
+
+
+
+3.0 - 03/13/2008
+-------------------
+* Faster program startup times (especially in large installs) with new object lookup code
+* Fix for special contact inheritance rules in host and service escalations
+* Fix for threading-related bugs that resulted in checks failing under NetBSD
+* Configure script fix
+* Fix for bug in processing $CONTACTADDRESSx$ macros
+* Documentation fixes
+
+
+
+3.0rc3 - 02/26/2008
+-------------------
+* Fix for passive service check stats bugs in nagiostats
+* Nagios no longer warns or errors when encountering host/contact/service groups with empty memberships
+* Debugging info fix in notification logic
+* Fix for multiline support in config files (again)
+* Fix for stripping illegal chars in output, perfdata macros
+* Patch to allow non-ASCII characters in notifications, etc.
+* Fix for bug in on-demand service macros with blank/null host names
+* Fix for cleaning up zombie child processes if large installation tweaks disabled and fork twice option disabled
+* Fix for incorrect total checks counts in nagiostats
+* Fix for segfault if embedded Perl support compiled in, but disabled by config file option
+* Smarter host check logic to reduce (uncached) on-demand host checks during "stable" service problems
+* Fix for recursive subgroup membership for host/service/contact groups
+* Fix for renaming/moving files on network file systems
+* New flap detection startup logic speedups when large installations tweaks enabled
+* Speed improvements during startup routines when using precached config
+* Speed improvements in reading retention data during startup
+* Safer loading mechanism for NEB modules to prevent segfaults in Nagios
+* Fix for segfault in CGIs when converting object names with extended ASCII characters to URLs
+
+
+
+3.0rc2 - 01/29/2008
+-------------------
+* Changed embedded audio MIME types in CGIs to "application/wav"
+* Fixed bug in sample helloworld NEB module
+* Modified p1.pl to allow for multiline-line output of Perl plugins under embedded Perl interpreter (epn)
+* Fix for incorrect environment variables names for custom host and contact macros
+* Fix for external command file thread polling code
+* Fix for cfg_dir directive not working on Solaris
+* Fixed segfault in extinfo CGI when passed an invalid service description/name
+* Fixed bug in summary CGI with reports on specific hosts
+* Fix for writing check result files under Cygwin
+* Fix for not building sample helloworld.o event broker module if event broker is disabled by configure script
+* Fix to sample event handler scripts
+* Fix for handling plugin output with escaped newlines and backslashes
+* Fix for bug in service and host event scheduling logic
+* Fix for reversed object sort order when using fast startup options
+* Fix for bug with notification commands not being run if notifications were not logged
+
+
+
+3.0rc1 - 12/17/2007
+-------------------
+* Fixed bug where status log was left after a restart with faulty config
+* Fix for compilation bug on systems that don't support setenv() (e.g. Solaris)
+* Support for line continuation/breaks in config files - end lines with one backslash (\) to continue on next line
+* Fixed bug with not deleting old check result files that contained results for invalid host/service
+* Fixed bug with init script option to check Nagios config
+* Auto-filled comment/author fields for acknowledging problems through WAP interface
+* Fixed bug with processing of CONTACTGROUPNAMES, NOTES, NOTESURL, and ACTIONURL macros
+* Doc fix regarding soft state dependencies
+* Fix for segfault in event broker module code
+
+
+
+3.0b7 - 11/23/2007
+------------------
+* Memory leak fix in macro code
+* Added use_timezone option to allow Nagios instances to run in non-native timezones
+* Fix for encoding HTML characters in CGIs
+* Fix for unimplemented $LASTHOSTSTATE$, $LASTHOSTSTATEID$, $LASTSERVICESTATE$, and $LASTSERVICESTATEID$ macros
+* Fixes for memory leaks with passive check, performance data routines
+* Makefile fixes
+* Code cleanup, fixes for compiler warnings
+* Fix to prevent FLAPPINGSTART notifications from incorrectly being resent after program restarts
+* Added free_child_process_memory and child_processes_fork_twice options for performance tweaks
+* Fix for bug in processing of on-demand service macros
+
+
+
+3.0b6 - 10/31/2007
+------------------
+* Logging API revamp, cleanup
+* Misc internal performance improvements
+* Bug fix with attempting to access an uninitalized mutex if external commands are disabled
+* Updates to .cvsignore files
+* Fix for embedded Perl interpreter to recache scripts when they're modified
+* Fix for cancelling inheritance with 'null' in various object directives
+* Additional functionality of additive inheritance feature
+* Fixed bug where missing host/servicegroups in object definitions didn't always generate errors
+* Increased max plugin output length cap from 4kb to 8kb
+* Caching of Perl scripts now enabled by default if embedded Perl interpreter is compiled in
+* Fix for segfault when contact definitions had no notification timeperiods defined
+* Retention of host/service check scheduling options
+* Fix for race condition when freshening host and service check results
+* Added null -b option to install-sh for Solaris so install scripts don't break
+* Added .gitignore files for git users
+* Added new external commands to change notification period for host, services, and contact on-the-fly
+* Added new external commands to change modified object attributes (affecting data retention logic)
+* Added $ISVALIDTIME:$ and $NEXTVALIDTIME:$ on-demand macros
+* Added enable_environment_macros option to determine whether or not macros are set as environment vars
+* Major overhaul (read: complete rewrite) of macro code, so macros are now only computed when found
+* Summary macros are now available as regular (non-environment) macros if requested when large installation tweaks are enabled
+* Bug fix for scheduling hostgroup host downtime through web interface
+* Better error logging when failing to rename/move files
+* Added $LASTHOSTSTATE$, $LASTHOSTSTATEID$, $LASTSERVICESTATE$, and $LASTSERVICESTATEID$ macros
+* Addition of object pointers to event broker module data structures (may require event broker module rebuilds)
+* Spec file changes to better support RPM builds on 64-bit systems
+* Possible fix for Unicode html encoding errors in CGIs
+
+
+
+3.0b5 - 10/08/2007
+------------------
+* Minor bug fix in CSS files
+* Bug fix in sample config files
+* Fix for recovery notifications not being sent out when first_notification_delay option used in host/service definitions
+* Fix for ochp commands not running properly
+* Special additive inheritance rule: escalation contact(group)(s) that begin with '+' will  now inherit from associated host/service definition if not inheriting from another escalation template
+* Status file is no longer deleted during restarts due to a SIGHUP or external command
+* Improvement in service flap detection logic
+* Added additional_freshness_latency config file directive
+* Improvements in freshness check logic
+* Temporarily removed $SERVICEGROUPMEMBERS$ macro, as it was causing crashes for some users (this need further investigation)
+* Added $EVENTSTARTTIME$ macro to indicate time Nagios started processing events (checks, etc.)
+* Added use_pending_states option to CGI config file to determine displayed state of hosts/services that have not been checked
+* Workaround to prevent browsers from incorrectly using cached statusmap image on page refresh
+* Fix for incorrect latency calculations for passive host/service checks
+* Added passive check latency stats to nagiostats
+* Added support for relative paths in config_file and config_dir directives
+* Fix for compile error under Solaris
+
+
+
+3.0b4 - 09/27/2007
+------------------
+* New macros: $HOSTGROUPMEMBERS$, $HOSTGROUPNOTES$, $HOSTGROUPNOTESURL$, $HOSTGROUPACTIONURL$, $SERVICEGROUPMEMBERS$, $SERVICEGROUPNOTES$, $SERVICEGROUPNOTESURL$, $SERVICEGROUPACTIONURL$, $CONTACTGROUPALIAS$, $CONTACTGROUPMEMBERS$, $NOTIFICATIONRECIPIENTS$, $NOTIFICATIONAUTHOR$, $NOTIFICATIONAUTHORNAME$, $NOTIFICATIONAUTHORALIAS$, $NOTIFICATIONCOMMENT$
+* Removed host/service downtime author/comment macros introduced in 3.0b2 in favor of more generic $NOTIFICATION...$ macros
+* Fix for segfault when cancelling active scheduled host downtime
+* Macro code cleanup
+* Added on-demand contact and contactgroup macro support
+* More complete (but still partial) support for macros in CGIs ($xNOTES$, $xNOTESURL$, and $xACTIONURL$ macros)
+* Fixed bug in config CGI with displaying incorrect notification interval for escalations
+* Added new 'check' option to init script to verify configuration
+* Added custom host and service notifications, with option to force the notifications and broadcast them to all contacts
+* Fix for on-demand/cached host check statistics
+* Fixed bug where null host check command would cause high CPU utilization
+* Alias, if not specified, now defaults to object name in host, hostgroup, servicegroup, contact, and contactgroup definitions
+* Fixed bug with excluding hosts, services, and contacts with bang (!) in object definitions
+* Fixed bug in nagiostats with NULL mrtg data arguments printing bogus string
+* Added custom delimiter option in nagiostats output (useful for CSV output)
+
+
+
+3.0b3 - 08/30/2007
+------------------
+* Minor bug fix for debug logging of macros
+* Version number is now printed in CGI pages
+* HTML documentation cleanup (HTML Tidy, link checking, etc.)
+* Fixed bug where notifications would not be sent out host/service contact group members
+
+
+
+3.0b2 - 08/29/2007
+------------------
+* Fix for some sample config files getting installed with .sample extension
+* Improvements to the host check logic performance (more use of cached and parallel checks)
+* Minor bug fix with notification timeout error messages
+* Fix bug with logging of passive host and service check results
+* Fixed bug with warning about no contactgroups being defined
+* Internal data structure cleanups
+* New macros: $SERVICEISVOLATILE$, $TOTALHOSTSERVICES$, $TOTALHOSTSERVICESOK$, $TOTALHOSTSERVICESWARNING$, $TOTALHOSTSERVICESUNKNOWN$, $TOTALHOSTSERVICESCRITICAL$, $HOSTDOWNTIMEAUTHOR$, $HOSTDOWNTIMEAUTHORNAME$, $HOSTDOWNTIMEAUTHORALIAS$, $HOSTDOWNTIMECOMMENT$, $SERVICEDOWNTIMEAUTHOR$, $SERVICEDOWNTIMEAUTHORNAME$, $SERVICEDOWNTIMEAUTHORALIAS$, $SERVICEDOWNTIMECOMMENT$
+* Added 'lock_author_names' option to CGI config file to prevent alteration of author names
+  when submitting comments, scheduled downtime, etc.
+* Fix for concatentation of multiline plugin perfdata
+* Added status CGI host/service property filters for hard and soft states
+
+
+
+3.0b1 - 07/31/2007
+------------------
+* Fixed bug with processing epn directives in Perl plugins
+* Fixed bug with check_result_path config option being ignored
+* Added $MAXHOSTATTEMPTS$ and $MAXSERVICEATTEMPTS$ macros
+* Fixed bug with incorrect output returned from embedded Perl plugins
+* Fixed bug where status data file was not read by CGIs using mmap()
+* Fix for CGI segfault
+* Program status now updated at least every 5 seconds for addons that watch NDOUtils DB
+* Added escape_html_tags option to CGI config file to escape HTML tags in plugin output
+* Added optional integration with Splunk into the CGIs
+* Added new action and notes URL target frame options to CGI config file
+* Added new 'exclude' option to timeperiod definitions for easy on-call rotation definitions
+
+
+
+3.0a5 - 06/19/2007
+------------------
+* Fixed problem with multiline long plugin output and Perl plugin output
+* Fixed compilation problem with embedded Perl
+* More debug/trace log functionality
+* Added new 'passive_host_checks_are_soft' config option
+* Fixed bug with host notifications occurring during soft host states
+* Fixed bug in processing multiple check results contained in a single file
+* Expanded timeperiod definitions to allow for day/date exceptions
+* Changes to sample config files and installation location
+* Changed debug file format to include current pid
+* Added 'initial_state' option to host and service definitions to allow for non-UP/OK initial states
+* Minor changes to freshness threshold calculation
+* Documentation updates
+
+
+
+3.0a4 - 05/08/2007
+------------------
+* Fix for segfault fix when low priority event queue's only item is removed
+* Added test for writeability of temp directory during configuration test
+* Fix for unescaping backslashes in plugin output in the CGIs
+* Removed check_result_buffer_slots option from main configuration file
+* New IPC method for passing host/service check results back to main daemon
+* Added check_result_path option to set path used to store check results
+* Added max_check_result_file_age option to control processing of check results in older files
+* Added new --with-temp-dir option to configure script
+* Removed legacy 2.x host check logic and use_old_host_check_logic option
+* Removed DEBUGx options from configure script
+* Added new debug/trace log functionaltiy (only partially complete)
+* Fixed compilation error under OSX
+* Fix for SIGTERMs being seen as SIGEXITs, non-logging of SIGTERMs/shutdowns
+
+
+
+3.0a3 - 04/10/2007
+------------------
+* Configure script fix for no mail program found/installed on system
+* Fix for compilation warnings about implicit declaration of round() - may (strangely enough) also
+  fix segfaults that were occuring on some systems
+* Added detection of Apache conf.d directory and 'make install-webconf' functionality
+* Configure script option bug fixes for cygwin and embedded perl
+* Added buffer stats and check statistics to performance information in extinfo CGI
+* Hostgroup and servicegroup definitions now have notes, notes_url, and action_url directives
+* Patch for incorrect time down percentage in availability CGI
+* Command definitions and host/service plugin perfdata with HTML should now be escaped in CGIs
+* Updated init script to fix a race condition during restarts
+* Documentation updates
+
+
+
+3.0a2 - 03/27/2007
+------------------
+* Added warning about aggregate_status_updates directive being deprecated.
+* Added new "p" option to host/service_perfdata_file_mode directives for pipes.
+* Fix for incorrect performance data file write/append mode options
+* Regular expression matching in object config files now also triggered by '+' and '\.'
+* Added support for extended regular expression matching in object config files
+* Fix for incorrect processing of y_2d coordinates for host objects in statusmap layout
+* Fix for current status of hosts with no check command defined
+* SIGSEGV signals should now be logged again (broken in 3.0a1)
+* Added warning for invalid temp_path directory
+* Documentation bug fixes and updates
+
+
+
+3.0a1 - 03/06/2007
+------------------
+Here are all the changes since Nagios 2.x:
+
+* Adaptive monitoring:
+     - Check timeperiod can now be modified on-the-fly
+
+* Notification changes:
+     - Added first_notification_delay to host and object definitions to delay first notification
+     - Notifications are now sent out when flap detection is disabled on a host/service-specific
+       or program-wide basis ($NOTIFICATIONTYPE$ macro = "FLAPPINGDISABLED")
+     - Notifications can now be sent out when scheduled downtime starts, ends, and is cancelled.  The
+       $NOTIFICATIONTYPE$ macro will be set to "DOWNTIMESTART", "DOWNTIMEEND", or "DOWNTIMECANCELLED",
+       respectively.  In order to receive downtime notifications, specify 's' or 'downtime' in contact, host,
+       and/or service notification options.
+
+* Object changes: 
+     - Added ability to use multiple template names (separated by commas) in object definitions
+     - Added ability to null out optional character directives in object definitions (using 'null' without quotes)
+     - Added hostg/service/contactgroup_members directives to host/service/contactgroup definitions,
+       respectively, for allowing including host, service, or contact members from "sub" groups.
+     - Added support for custom variables in host, service, and contact definitions
+     - Added host_notifications_enabled, service_notifications_enabled, can_submit_commands to contact definitions
+     - Added optional display_name directive to host and service definitions
+     - Removed serviceextinfo definitions and merged variables with service definitions
+     - Removed hostextinfo definitions and merged variables with host definitions
+     - Services inherit contactgroups, notification interval, and notification period from associated host if not specified
+     - Service escalations inherit contactgroups, notification interval, and escalation period from associated service if not specified
+     - Host escalations inherit contactgroups, notification interval, and escalation period from associated host if not specified
+     - Host, service, host escalation, and service escalation definitions now support a 'contacts' directive, along with 'contact_groups'
+     - Service dependencies with blank dependent host/hostgroup names will create "same host" dependencies
+
+
+* Performance optimizations:
+     - Added ability to precache object config files
+     - Added ability to exclude object relationship and circular path
+       checks from verification process
+
+* Check output:
+     - Multiline output support for host and service checks
+
+* Macro changes:
+     - Added $LONGHOSTOUTPUT$ and $LONGSERVICEOUTPUT$ macros
+     - Added $TEMPPATH$ macro
+     - Removed $COMMENTDATAFILE$ and $DOWNTIMEDATAFILE$ macros
+     - Added $HOSTDISPLAYNAME$ and $SERVICEDISPLAYNAME$ macros
+     - Custom host/service/contact macros accessible via $_HOST<varname>$, $_SERVICE<varname>, or $_CONTACT<varname>$.
+       On-demand host/service macros for custom vars are working.  Custom vars are also set as environment vars.
+     - On-demand service macros can contain and empty host name field.  In this case, the name of the current host will be used.
+     - $HOSTNOTES$ and $SERVICENOTES$ macros may now contain macros themselves
+
+* Flapping changes:
+     - Added flap_detection_options directive to host and service definitions to control which
+       states (i.e. OK, WARNING, UNKNOWN, and/or CRITICAL) are used in flap detection logic
+     - Percent state change and state history are now retained and recorded even when host/service
+       flap detection is disabled.
+     - Hosts and services are immediately check for flapping when flap detection is enabled program-wide.
+     - Hosts/services that are flapping when flap detection is disabled program-wide are now logged
+
+* External command changes:
+     - Added PROCESS_FILE external command to allow processing of external commands found in
+       an external (regular) file.  Very useful for passive checks with long output or scripting.
+     - Custom commands can now be submitted to Nagios.  Custom command names are prefixed with an underscore
+       and are not processed internally by the Nagios daemon.  They may, however, be processed by NEB modules.
+     - External commands are now checked by default.  Nagios 2.x and earlier did not check for external commands
+       by default.
+
+* Status data changes:
+     - Contact status information is now saved (although it is not processed by the old CGIs)
+
+* Retention data changes:
+     - Contact status information is now retained across program restarts
+     - Comment and downtime IDs are now stored across program restarts, should be unique unless reset
+     - Added retained_host/service_attribute_mask variables to control what host/service attribs are retained globally
+     - Added retained_process_host/service_attribute_mask variables to control what process attribs are retained
+     - Added retained_contact_host/service_attribute_mask variables to control what contact attribs are retained globally
+
+* Downtime changes:
+     - Scheduled downtime entries are now stored in the status and retention files
+
+* Comment changes:
+     - Comments are now stored in the status and retention files
+     - Non-persistent acknowledgement comments are now deleted when the acknowledgement is removed (instead of when Nagios restarts)
+
+* Host check logic changes:
+     - Most host checks are now run asynchronously, in parallel!
+     - Scheduled host checks now help improve performance, instead of hinder it (if caching is enabled)
+     - Added cached_host_check_horizon option for enabling use of cached host check results
+     - Added enable_predictive_host_dependency_checks for enabling predictive checks of dependent hosts
+     - Added retry_interval to host definitions
+     - Added check_for_orphaned_hosts option and support for orphaned host checks
+     - Passive host check states can now be translated from their original DOWN/UNREACHABLE state if the
+       new translate_passive_host_results option is enabled
+
+* Service check logic changes:
+     - 'parallelize' option in service definitions deprecated/no longer used
+     - Added cached_service_check_horizon option for enabling use of cached service check results
+     - Added enable_predictive_service_dependency_checks for enabling predictive checks of dependent services
+
+* Dependency changes:
+     - Host and service dependencies can now have a timeperiod during which they're valid (dependency_period directive)
+
+* Event broker changes:
+     - Updated NEB API version
+     - Modified adaptive program status callback
+     - Added adaptive contact status callback
+     - Added host/service precheck callbacks to allow modules to cancel/override internal host/service checks
+
+* Embedded Perl changes:
+     - Added 'enable_embedded_perl' option to main config file to control whether epn is enabled/disabled
+     - Added support for perl plugins to specify whether or not they should be run under the epn...  The
+       second to tenth line of a perl plugin may start with '# nagios: +epn' or '# nagios: -epn' to explicity indicate that it
+       should be run under the epn.
+     - Added 'use_embedded_perl_implicitly' option to main config file to determine whether or not perl
+       plugins will use the epn if they don't explicitly allow/disalow it
+
+* CGI changes:
+     - Hostgroup and servicegroup summaries now show important/unimportant problem breakdowns like the TAC CGI
+     - Minor layout changes to host and service detail views in extinfo CGI
+
+* Misc changes:
+     - More information given when testing scheduling (-s command line option)
+     - Removed fixed length restrictions for host names and service descriptions
+     - Plugin output length restriction bumped up to 4K
+     - Added temp_path directive to main config file for specifying temp directory
+     - Multiline output support for system commands via my_system()
+     - Added global event_id and notification_id vars that are at least unique during a single run of Nagios
+     - Default is now to check for orphaned services, rather than not
+     - Renamed service_reaper_frequency to check_result_reaper_frequency
+     - Fractional notification and check intervals are now supported (e.g. "3.5" minutes)
+     - Backslash chars are now used to escape command arguments that contain \ or ! characters
+     - Added 'external_command_buffer_slots' and 'check_result_buffer_slots' variables to specify size of internal buffers
+     - Added check statistics to status file, available via nagiostats for graphing in MRTG
+     - Added $HOSTGROUPNAMES$, $SERVICEGROUPNAMES$, $HOSTACKAUTHORNAME$, $HOSTACKAUTHORALIAS$, $SERVICEACKAUTHORNAME$,
+       and $SERVICEACKAUTHORALIAS$ macros
+
+
+
+

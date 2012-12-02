@@ -1,0 +1,162 @@
+#!/usr/bin/perl
+
+use Getopt::Std;
+
+my %opt;        # Hash for command-line options.
+my $CMD_LDAPSEARCH = '/usr/bin/ldapsearch -x';
+my $master='';
+my $slave='';
+my $debug=0;
+my $protocol='ldap';
+my %master_hash;
+my %slave_hash;
+my $match = 1;
+my $master_file =  '/tmp/master.txt';
+my $slave_file = '/tmp/slave.txt';
+
+my $opt_string = 'm:s:duh';
+getopts( "$opt_string", \%opt ) or &usage() and exit;
+if ($opt{h}) {
+  &usage;
+  exit 0;
+}
+
+$master=$opt{m};
+$slave=$opt{s};
+
+if ($opt{u}) {
+  $protocol='ldap';
+}
+
+if ($opt{d}) {
+  $debug=1;
+}
+
+if (!$opt{m} and !$opt{s}) {
+  &usage;
+  exit 2;
+}
+
+&get_master_data;
+print "master - questionmark = $?\n" if ($debug);
+if ($? != 0) {
+  print "Error searching against $master.\n";
+  exit $?;
+}
+&get_slave_data;
+print "slave - questionmark = $?\n" if ($debug);
+if ($? != 0) {
+  print "Error searching against $slave.\n";
+  exit $?;
+}
+
+open(FILE1, "> $master_file") if ($debug);
+open(FILE2, "> $slave_file") if ($debug);
+foreach $k (keys %master_hash) {
+  if ($debug) {
+    print FILE1 "$k\n";
+    print FILE2 "$k\n";
+    print FILE1 $master_hash{"$k"}."\n";
+    print FILE2 $slave_hash{"$k"}."\n";
+  }
+  if ($master_hash{"$k"} ne $slave_hash{"$k"}) {
+    if ($debug) {
+      print "Out of sync: $k\n";
+    }
+    $match = 0;
+  }
+}
+
+close(FILE1) if ($debug);
+close(FILE2) if ($debug);
+
+if ($match) {
+  print "$slave is in sync.\n";
+  exit 0;
+} else {
+  print "$slave is not in sync.\n";
+  exit 2;
+}
+
+sub get_master_data {
+  my $dn = "";
+  my @data = ();
+  my $status = 0;
+
+  $status = open(MASTER, "$CMD_LDAPSEARCH -H $protocol://$master |");
+
+  while ($line = <MASTER>) {
+
+    chomp $line;
+    if ($line =~ m/^dn/) {
+      $data = "";
+      $dn = $line;
+      $line = <MASTER>;
+      chomp $line;
+      while ($line ne "") {
+	push(@data, $line);
+        $line = <MASTER>;
+        chomp $line;
+      }
+      foreach $i (sort @data) {
+        $data .= "$i\n";
+      }
+	@data = ();
+      $master_hash{"$dn"} = $data;
+    }
+  }
+
+  close(MASTER);
+
+  return $status;
+
+}
+
+sub get_slave_data {
+  my $dn = "";
+  my @data = ();
+  my $status = 0;
+
+  $status = open(SLAVE, "$CMD_LDAPSEARCH -H $protocol://$slave |");
+
+  while ($line = <SLAVE>) {
+
+    chomp $line;
+    if ($line =~ m/^dn/) {
+      $data = "";
+      $dn = $line;
+      $line = <SLAVE>;
+      chomp $line;
+      while ($line ne "") {
+	push(@data, $line);
+        $line = <SLAVE>;
+        chomp $line;
+      }
+      foreach $i (sort @data) {
+        $data .= "$i\n";
+      }
+	@data = ();
+      $slave_hash{"$dn"} = $data;
+    }
+  }
+
+  close(SLAVE);
+
+  return $status;
+}
+
+sub usage {
+  print "Details:\n";
+  print "          This will make sure the slave ldap server contains\n";
+  print "          the same data as the master ldap server. It returns 0\n";
+  print "          on success, or a non-zero status (with message) when\n";
+  print "          the databases do not coincide.\n\n";
+  print "Options:\n";
+  print "          -h       This help output\n";
+  print "          -m host  Specify the master server\n";
+  print "          -s host  Specify the slave server\n";
+  print "          -u       Un-encrypted (don't use TLS)\n\n";
+  print "Usage:\n";
+  print "          $0 -m ldapmaster.mainsite.net -s ldapslave.remotesite.net\n";
+  print "\n";
+}

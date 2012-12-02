@@ -1,0 +1,41 @@
+#!/usr/bin/perl
+#
+#  --- [icinga_check_url_content] Perl Script for Icinga ---
+#
+# Author(s):     Ryan Irujo
+# Inception:     02.01.2012
+# Last Modified: 02.02.2012
+# Changes:
+#
+# Description:   Perl script that checks URL via curl and returns back a Critical or OK State based upon
+#                a defined Regular Expression. The "/" are already provided in the Script as the Regular Expression
+#                matching is Perl Based.
+#
+# Command Line:  ./icinga_check_url_content "[url]" "[RegEx_Definition]"
+# NRPE Examples: ./check_nrpe -H srv102.fabrikam.com -c icinga_check_url_content -a "http://www.google.com" "(search)"
+#                ./check_nrpe -H srv102.fabrikam.com -c icinga_check_url_content -a "http://www.cnn.com" "(news)"
+
+$URL   = $ARGV[0];
+$RegEx = $ARGV[1];
+
+if (!defined $URL || $URL eq ""){
+        print "A [URL] has not been provided.\n";exit 3;
+        }
+if (!defined $RegEx || $RegEx eq ""){
+        print "A [Regular Expression Value] has not been provided.\n";exit 3;
+        }
+
+$URLCheck = `curl -s $URL | grep "" -c`; 
+$Content  = `curl -s $URL`;
+$Filter   = $Content=~/$RegEx/;
+
+if ($URLCheck == 0){
+        print "[$URL] - is not returning any data. Verify the URL specified exists!\n"; exit 2
+        }
+elsif ($Filter == 1){
+        print "Content Match Found on - [$URL].\n";exit 0;
+        }
+elsif($Filter == ""){
+        print "Content Match NOT Found on - [$URL]. Check on the URL!\n";exit 2;
+        }
+

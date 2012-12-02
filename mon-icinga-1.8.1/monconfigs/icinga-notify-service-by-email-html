@@ -1,0 +1,836 @@
+#!/usr/bin/perl -w 
+#
+# First we explicitly switch off the Nagios embbeded Perl Interpreter
+# nagios: -epn
+# ######################### pnp4n_send_service_mail.pl ################ #
+# Date    : Mar 07 2012                                                 #
+# Purpose : Script to send out Nagios service e-mails.\n";              #
+# Author  : Frank Migge (support at frank4dd dot com)                   #
+# Help    : http://nagios.frank4dd.com/howto                            #
+# Licence : GPL - http://www.fsf.org/licenses/gpl.txt                   #
+#           Written for and verified with Nagios version 3.2.3          #
+# Help    : ./pnp4n_send_service_mail.pl -h                             #
+#                                                                       #
+# Version : 1.0 initial release                                         #
+# Version : 1.1 add multipart S/MIME and logo                           #
+# Version : 1.2 cleanup mail body generation code                       #
+# Version : 1.3 use environment variables for Nagios data handoff       #
+# Version : 1.4 add the performance graph image if available            #
+#           this has been implemented for Nagiosgraph v0.9.1            #
+#           pnp4n_send_service_mail.pl has been adapted for PNP4Nagios  #
+# Version : 1.5 code improvements provided by Zachary McGibbon and      #
+#           Sean Clerkin                                                #
+#                                                                       #
+# Modified: 04.11.2012 - [R. Irujo]                                     #
+#           Changed "http" entries to "https" since Apache has been     #
+#           configured to require SSL connections in Icinga.            #
+#                                                                       #
+#           05.12.2012 - [R. Irujo]                                     #
+#           Modified the '$clean_service' variable to also replace      #
+#           '/' with '_' when looking for PNP4Nagios Graphs. This       #
+#           was done to accommodate Services with names like            #
+#           'Base - Disk Space - /var/log'                              #
+#                                                                       #
+#                                                                       #
+#########################################################################
+
+use lib qw(/usr/local/rrdtool/lib/perl/5.8.8/x86_64-linux-thread-multi);
+
+use Getopt::Long;
+use Mail::Sendmail;
+use Digest::MD5 qw(md5_hex);
+use MIME::Base64;
+use RRDs;
+use File::Temp;
+use strict;
+use warnings;
+
+chomp(my $hostname =`hostname`);
+
+
+# The version of this script
+my $Version            ='1.5';
+# the sender e-mail address to be seen by recipients
+my $mail_sender        = "Icinga Monitoring <icinga\@$hostname";
+# The Icinga CGI URL
+my $icinga_cgiurl      = "https://$hostname/icinga/cgi-bin";
+# Here we define a simple HTML stylesheet to be used in the HTML header.
+my $html_style         = "body {text-align: left; font-family: Verdana, sans-serif; font-size: 8pt;}\n"
+                       . "img.logo {float: left; margin: 10px 10px 10px; vertical-align: middle}\n"
+                       . "span {font-family: Verdana, sans-serif; font-size: 8pt;}\n"
+                       . "table {text-align: left; margin-left: auto; margin-right: auto;}\n"
+                       . "th {white-space: wrap;}\n"
+                       . "th.even {background-color: #D9D9D9;}\n"
+                       . "td.even {background-color: #F2F2F2;}\n"
+                       . "th.odd {background-color: #F2F2F2;}\n"
+                       . "td.odd {background-color: #FFFFFF;}\n"
+                       . "th,td {font-family: Verdana, sans-serif; font-size: 8pt; text-align:left;}\n"
+                       . "th.customer {width: 600px; background-color: #660099; color: #ffffff;}";
+my $table_size         = "600px";
+my $header_size        = "180px";
+my $data_size          = "420px";
+
+# the commandline argument -H/--smtphost
+my $o_smtphost         = "127.0.0.1";
+
+######################################################################################
+# This is the logo, a base64 encoded image file. The content below is the Nagios logo
+# nagios-logo.gif. It can be replaced with any picture, such as your company's logo.
+# A base64 conversion example: # uuencode --base64 logo.gif < images/nagios-logo.gif
+# or by using the perl script convert_img_base64.pl.
+######################################################################################
+
+
+my $logo = "iVBORw0KGgoAAAANSUhEUgAAAHgAAAArCAYAAACzfkyLAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv\n"
+. "8YQUAAAAJcEhZcwAADsQAAA7EAZUrDhsAABJaSURBVHhe7VwHWFVXtv7p0juoIFVUQKmiYNRglKCCio\n"
+. "6KJfZRY3Qyzzjq2FuMiS150ViSGDuOAUvUqIkTO+o8FYOKsUeNDaQjvZy31r5cRrj3wsFA5n3vuyvf+\n"
+. "bjeu8/a+6y1V9n/Wic6EhG09P9WArqN9WRZmZnIf/mysdhr+cqUQIMr+OrVqwgNCUVYx04IDgrBzm07\n"
+. "ZC5FO6wxJNCgCr5z5w7C3wjHy5f5MDU3g6mxKUaOGo2EbxMaY+1anjIk0KAK/nL9RpiYmsLCyhJmJmY\n"
+. "wMTOBV0svbPr6GxlL0Q5pDAk0qIIfPvoNRkZG0NPVhYGePnR16K+BAXJyshtj7VqeMiTQoAqeMuU9pL\n"
+. "14geLCIuQXFqC4pBgPHz5CdHS0jKVohzSGBHQa+pi04uMVWL58JQwN9VFUVIzu3d/Ctp3b0KRJk8ZYv\n"
+. "5ZnHRJocAXzfLNmzMTbPXuhrKwUEW9HaJXwH5RAgyt41crlmDptOsVfnf/gY2mnVkpAJQaXlJRgzt/n\n"
+. "YGjsMNy/d79ekkp9noqmTZtplVsvqTXuYBUFf7LsE6xfvwGXL17GyOEjgXogmSdO/ITQsE6Nu2It93p\n"
+. "JQEXBd+/cha2tLewcbJGdm4MKmQrOy82lpKoAnp6e9VqAdnDjSkBFwctXLSc364j8vAIMHz4Mhw8dUl\n"
+. "nBS8KYryYn49gPx5CYmIjMjAwcOXIE0VF9X2u140aPg7uLB4LaBeHmzZuvxUN7kwYJ8DFJHRUUFIivk\n"
+. "5IuS6tXrKgasnL5cimgXaBkb2Un2VrYSnaWdpKrk4vUp3eUlJ2drYmdxu9nTJsh2ds4SO2DO0i+3r6S\n"
+. "czNnKTM9o958tDeol4CsLDo9PR379+7FsR+P4eCBw2jRwhlGTYygQ5kye/Cy8nLkZGWRO6/AoSOHEBw\n"
+. "cLNugwrt0I+w6D1aWliIcnDp9Gjdv/wIvLy/ZPLQDNUtAFpJlZ2eHX27cxNGjx+DVygvGJiYEQRoqLk\n"
+. "MDNCF40s7eHsbGJujTMxoF+fm1yvzZ02e4dPEiThz/JywszPDiRTpeEvKVnZMLa0srWFpYanXWQBKQZ\n"
+. "cFJSUmIioyCja2NwJr19Qln1tMTFsxUQRZcWlqG8vIyPHv2HOMnjMPSZR9VLTEvLw8PHvyKa8lXSZlp\n"
+. "cHVzg4dnS8HPzsYWMX3748aNX4iRhG+2fYMeET0a6PG0bGQpeNmHS7F69Wdo3tyJIEhD6BvoQ48UzEU\n"
+. "FdqsVFRWk4FKUlJQSDl0Ic3NTfPr5p6TUByjML4C5pQUlbk3hHxAIKysrtVLPzcmBBblpLTWsBGQpeM\n"
+. "igITh7NhHsqo2MWMEG0CcFsyWzcsvKyIIJliwtJgVTgSGfYuqOXTvQPqQ9jW8cDLqQNhLPa2ZmWuVJG\n"
+. "lY0QBHNoUtVMUMKQ7+HhHxKS4T30yWj+CNJloJjBw1G4tnzpGB7WiQplxVMymUL5pau8vIKFJcWo6y4\n"
+. "DEUlRcJqr1xNgqUGa1X3gDdSbsDV1RWmpDBNxMnczi3bcHD/QRG3y2lTWVC8Dn0jDKPHj4GLi4vGexm\n"
+. "hS76SjJCOIbXK9/nz5/hy3UYB9GRT25EeKdjN3Q2RUT0RO2xIvXRz7OiP2BOfgPt37gu5mFGt3NvXF6\n"
+. "PHjUE7/3b14qUcHLd1J0JCO8CrtbwkVNZ2CgwMRElxESmzAuVksWy15SRsvspIueUV5ZD4e/q9guKwJ\n"
+. "blaE0rE5FJs/1gEtw2Erbm1cPXqaHfcP+DR1A1zZszFTUr4crKzyVMU4PHjJ9j6zVa09fTFwtnz1d77\n"
+. "4NcH8HZrjU6hoRg7fIzGZc2bORd+Xj7Y+vVm3L97D7kE3mRkpOPCufP463vvo21LH5w5ebrOx7p16xZ\n"
+. "6dO6GoQOG4NTxk0hNTaVTRg5+e/SYNud3CA/rggHRMXXyqTlgPj3feMIMAn38BV85JEvBEZz0UELFwi\n"
+. "8nd1NWViauEvo3ux7x79JyofiM9Cz0ju5F2bWhnPnFmKRLF+Ht7Q0bS2v8cPioyn3c1/XumPHkQWzh2\n"
+. "NRBbKiszCykk/ALC/LJis3Rinb0Zuoc6d+7n8r95xPPi9Dh5+OHkydOIi0tTWVMz/AI7Ny+HS1cXEVH\n"
+. "SjGVOjMzMqlZIRc6ujpwdnYWecewgUMRt2OnxmdL/jkZvbpF4jklm+6ebhTKDMBJJq+3sKAAJtTG5OH\n"
+. "pgV+uk8dyaCFbRi+ozv71hq/g4+tDHsUVHy76UNa9shQcHBKC4e8MxZPHjxUxlzLmUkqoWOGsXP7M1s\n"
+. "wPom+giwWLFsqaXDlIbAY6T+vpUuJGLvFVunXzFj6YPBWe1Poj0X8EgqBjaEcsW/WJyLhjhw8VsZ9js\n"
+. "r29g3DDi+ctqsZD5AvMl+bgJLFmHNywdh2uJF2FtbWtUGxxUQn6xPTDZ+s+x8KlC9HGx4c2boZQsC0d\n"
+. "B9/78yRh3eooukdvmJqawZByj6zMHDRzao6p06dh7ZdfYAydLjgO5+bkUSgyE0bwzuBhsmQVH/ct9Ek\n"
+. "+dNCgZzDG9eRruH9fRjGoPgjQwJgBkrW5tdTSvZXUllAnP18/+ttO8mnlIznaNZNaunlIly9dqg9LMd\n"
+. "bHo7UU4O0nOdk0kw4fPFzt/kH9BkqtXb2kIB9/ybO5u7R7124V/mQtUuf2YVI7Lx8pyDdAojSQIgbl9\n"
+. "5UUv+tbydWxhUSujXi1ksgaqn4jK5WaWzcl/gGSj3sbKTSwg0TWpjLHwQMHxfqCiT+vZ+KYCSpjNqxd\n"
+. "L7Wwc6IxQZKrvZO0YPZ8tbL4U/QAycvZQ2rfLkiyMbKUTh4/UavMKH+QuoS8Ifm1akvrDBQXhRzp3TE\n"
+. "T65S1LAtWbrH4fXvQoUMwHBzskJmZjacEWLyg+MLWExnZHWu+WIOgeqBY1baupFo/5sSLz86mlJykp6\n"
+. "VjzsK5GDxksMqOdyTsfO/33yH1eRoqyipgoKNPlvyzyjgdqM6RsDueLFrxPR/rN23fDCtrK5V7o/tEY\n"
+. "8rU94Wr5fUc3H9AnPmVxDLYsXUHbGxsBNDTPiyUrL+6J1GOjduzSwBDBZSMGhobUYhKqtWK4/8RT61P\n"
+. "D0V/G2MN7IqaGDfBGUL90inZrI3qpeCvNm7EvkMHcPLMSRw5+j3i6CgUvz8BZ86dxtYd2/Hot4eUlGT\n"
+. "IcjnVBpFgWcQ1xc/JVEFBoeIYRFfMn/pr5G3vYI+//X26aPDzDwpEAF1qqcYknC2zuywgBXGGzTFOEw\n"
+. "0aMkgol6moqIiy7KyqoZmUcd+/dw96+npiw48YPUIjHw4TS1d8hLzcPDIWBwyMHVSrzLZt2kLHQXMRB\n"
+. "nnzcZhkmeTTRtpSR8eqbAUnXb4Mc4IVjZsYi53kF+CPiMi30aVLFzhRAsI0ePBQ7IrTnIDUV/MlxcWi\n"
+. "Hs0P1LRZUzFvbTR99gzcf/oQiZfOyZ6qkCBSHYptZZRHNHNuXut9Lm6u4ujHx0Ij6jHjPnAlcZJZRM2\n"
+. "GvBENKc46ODrWyqsb9ao9evEYybeuUWKnOdlKuX4dLHtjE2PKgZ7gqy1fkZcMIvz+JZ1WrLB9y/bfb8\n"
+. "F8JPnp2DEMGTq8Vma8u1q1ao19e/dRwlWP11Yocaggzny9SgrLVX4v8xUqDZ1CfLfgUIONjhJ44HlIc\n"
+. "bURHwH53A8dSXgbTgqVxEtVunpOBvlI2RC0ctlKqs07iGSWsX+v1q0xbfZ0SmzLCITRRT5l5nvj92qc\n"
+. "Sq0FvyTl8KWkTZs2YfTYsbLWe/vWHUycMAn9+qgeV2pjUKlLtUMaortLXQjgyRTfKxRWF1XtDdaxmsH\n"
+. "8u4IXfdKwH1lRxeSZSopLxF++NFEa5TcXL/xLFHPy819SDjJHDPWhrN4v0E+cXozJkyxduESego8e+Q\n"
+. "HB/sGi+M5XaEgYVq9Yid5RvWBPu0gOcV8WI0DcDy2b2FA1CE2pBNm86hpYQzNskGyVMhtXoMwFFeOra\n"
+. "5FZK/hVJhU11pJ45iyCvAPg39oPgd7+CGwTAG/31ti8abPaVf/3qs9EPGeehmS94yaOqxo3kmI8N1rw\n"
+. "sev2rduU8D1Ty6PKgr8jhCWGrI6TDWcXZ3HlUAFg7uwFhOr8WpfYqn5f8tES/M/li0gmqFI2yfS+svn\n"
+. "VZ6DI39QrRB0bYfEa3IGwYMFK/QP9ZcIUKsgUU1m1CcVpQ+oVN4QpIX5rVn1OIEhhtekYzGFIlgswBQ\n"
+. "TmDBw8sBquP4D+7eLaQrQmOzs74aNFSzUrmActXrBYICzmhAoxzMiXubk5oTHumDNrHi2sRLbYAgL9Y\n"
+. "Ub3yiZN/lM2g9cf+G+rk8dDYaFsuwqHXJOUv6vjNmjYYPFiHoc/lqeOjp4oZrALrtn7Fh8XL6yXNx8X\n"
+. "bC5duoSBfQYgpldfccX2HyzWoUOvBxmbmOK7PfvBOHpNEhbM7vQZuVZ++4BLgYaUrfKlT28nsAtIS0v\n"
+. "FwwcP5UngdUaxwCgnUesmK3+jVFd94JM5n+CvLu/h5EhccqKwYiyT8m/V9GKnKCyYky11Z+5Z82Zjz6\n"
+. "G92EiZ8PCRwwkNy6Gx6sP1onkLyNKNBS+uZj357QkY1bt39664blB2zTGY0TUew+vZvWO3egWL5XBmy\n"
+. "KurUJiT8rPSHTV6mUuNFVc5OvqNj0x8XKqN+GzKFRwWhApp8hJKi5QZhMWwynuqzVG5NP5dWYxRt9aO\n"
+. "BIC81eMtgj+9USQKOCx3qSoD53tSrqcglWIqn5e5kYIx8VzCxPPJ+l+9sqhNKjsrW2TsltbWiNu5k7x\n"
+. "DXrVphQU7kQ+3t3MQOGxZORXuqYBQTFkef+b3i7hM6Ex9WI1GIg6qGqglgf58FNCji5OIjBe1gygjYt\n"
+. "/ByKEjERbQQVW/lXPUDI8Kd6spaqo+sdh0xEskUq+QEcVTCwsL4YVYKY+o2aE2+te5C+QxTah4I1Gct\n"
+. "RLWqqS1n66BY7Pmgg971XlL5uODGdPwwUy+/lZ1MbAz6f3J5AnyBIb//Mkz6pmr3gUrFMxuePGShUi5\n"
+. "lULoSq7w/YVFhQJpuUHfLVq8UIxpNKq0ipr8O4Z1FMiNQHBICEsWLNK4BMKwcfrEaTg7OQsdnj11tvp\n"
+. "Y5Rw1PDF7foWLlvd0VS66xgHTkTpW/ALo6ELGYUkdLMs+/Fgjw4ek/AOU1FpYmIpqWLuAtlVjGRHbl7\n"
+. "CHEDMTZGdnCVc+5s9jCSb9C6b8V/Xrvb9OxjRSejA1VnDyZkHzblizTtWC+Zu+/fvh1IlTAjp7RPGWL\n"
+. "/58/PgJxAyIkff0rztKg3AZ131n5AikUX5gbmmOk/88KWqs7LKUxC5uPVWDJo4dT17GibwPZ6nG6Pxm\n"
+. "Z3mrIdfKFRqZHlqMZVIXLRYvWyJe99GnIw1X3Dq374Qb11KqreMCNU5069QNBvpcTtVFLiFSs+Ypzrd\n"
+. "Mqz5eSS/Rm4tuFcarR42vG3+YOWcmnpH1GhkZ42bKTVxIvFDFr9o+7BreFcdPHcflny+L6/ipn9CtW7\n"
+. "g8Qf2OUa8mPwIpeoUmTH4Xrh7u1IifT0161rhCsF1El+7oGxmNAVExeLNjF3y2fDWFGDtKoiRqBMhBX\n"
+. "MKuajwEz0q23JjwqpvmbJhjoHC7dcR4kURVctbRVUCorxLDt1F9o0QzgompMcXHLAyKGYioHj3FWiPf\n"
+. "jMCYEaMIV+ZyogEeUQFh6SdLRYGCievUP1IOYWlpJhKwPv36UIepRZ2SDSTo0tzKgjZFMZUz7bBu7Rf\n"
+. "qFczfclbmSpgrX/z5jyCuqpQSwsN/lXCfcl5z+n99HD3xA1WvMkXIMKEjAXeO/HrvAe4QasbJBwPxjB\n"
+. "BxdWvm3FkI796tuoJJM0XF3MPFjQll1Xq4GFEqpSMLv7Re1/OycosodJUTn7zcl6RE1a6Vb/clwJUK8\n"
+. "i9S00S9l0Mbd3Lcua0AI7i1mDPnJ4+fCs84ftKEqrWmXLsuau68HxnEGDV2lGzxz54/mzZUDsGnOlQr\n"
+. "ThGyFFRnQfEPGLBp4yZRx43o2qPW2SZPmCS1oTqoi4Oz1IZqsoQCSe7NXCU3RxcpPKyrdO5sotr7uZ7\n"
+. "K9Vuu4+7YtrPamJ+TrkjBVF8ldyqlUl25Loqj+/2pLhsbM0giUEjjcEKhqD7tK7nYO0utWniKWrOnkw\n"
+. "fVi52lTsFhUsLuBLX3fjBlqtSSxq36+N9vk9S1Jv6d8iapX88+kq+Ht0QtTFW3yGq6k72NfsdAelVGV\n"
+. "h/X0ydP8SNBqtwbxRYdFBKEiJ6RlGjU/TYFvVqjtm2XQQeuVCn7vOt6DC7TKcuGtY3NoDdCzlPMPXzo\n"
+. "e1G39WzZEpG9I9E1/E1xOtBEnGNwz3h9iUMRJ8mvth//n1FwfR9GO16eBP4XOQzHB6wuiLQAAAAASUV\n"
+. "ORK5CYII=";
+
+
+# ####################################################################################
+# Here I define the HTML color values for each Nagios notification type.
+# There is one extra called TEST for sending a test e-mail from the cmdline
+# outside of Nagios. The color values are used for highlighting the
+# background of the notification type cell.
+# ####################################################################################
+
+my %NOTIFICATIONCOLOR=('PROBLEM'=>'#FF8080','RECOVERY'=>'#80FF80','ACKNOWLEDGEMENT'=>'FFFF80',
+                       'DOWNTIMESTART'=>'80FFFF','DOWNTIMEEND'=>'80FF80','DOWNTIMECANCELLED'=>'FFFF80',
+                       'FLAPPINGSTART'=>'#FF8080','FLAPPINGSTOP'=>'#80FF80','FLAPPINGDISABLED'=>'FFFF80',
+                       'TEST'=>'80FFFF','CUSTOM'=>'C0C0C0');
+
+my %PROBLEMCOLOR=('DOWN'=>'#FF8080','CRITICAL'=>'#FF8080','WARNING'=>'FFFF80',
+                  'UNREACHABLE'=>'80FFFF','PENDING'=>'80FFFF','UNKNOWN'=>'#DE0AFF',
+                  'UP'=>'#80FF80','OK'=>'#80FF80');
+
+# ########################################################################
+# Here we set the information where to pick up the RRD data files for the
+# optional graph image generation, plus the graph size width x height px
+# ########################################################################
+my $rrd_basedir        = "/usr/local/pnp4nagios/var/perfdata";
+my $graph_img_size     = "521x60";
+my $graph_bgcolor      = "#F2F2F2";
+my $graph_border       = "#999999";
+
+####### Global Variables - No changes necessary below this line ##########
+# Icinga notification type, i.e. PROBLEM
+my $o_notificationtype = $ENV{ICINGA_NOTIFICATIONTYPE};
+# Icinga notification author (if avail.)
+my $o_notificationauth = $ENV{ICINGA_NOTIFICATIONAUTHOR};
+# Icinga notification comment (if avail.)
+my $o_notificationcmt  = $ENV{ICINGA_NOTIFICATIONCOMMENT};
+# Icinga service description
+my $o_servicedesc      = $ENV{ICINGA_SERVICEDESC};
+# Icinga service state
+my $o_servicestate     = $ENV{ICINGA_SERVICESTATE};
+# Icinga service group the service belongs to
+my $o_servicegroup     = $ENV{ICINGA_SERVICEGROUPNAME};
+# Icinga monitored host name
+my $o_hostname         = $ENV{ICINGA_HOSTNAME};
+# Icinga monitored host alias
+my $o_hostalias        = $ENV{ICINGA_HOSTALIAS};
+# Icinga host group the host belongs to
+my $o_hostgroup        = $ENV{ICINGA_HOSTGROUPNAME};
+# Icinga monitored host IP address
+my $o_hostaddress      = $ENV{ICINGA_HOSTADDRESS};
+# Icinga service check output data
+my $o_serviceoutput    = $ENV{ICINGA_SERVICEOUTPUT};
+# Icinga date when the event was recorded
+my $o_datetime         = $ENV{ICINGA_LONGDATETIME};
+# The recipients defined in $CONTACTEMAIL$
+my $o_to_recipients    = $ENV{ICINGA_CONTACTEMAIL};
+# Link to Documentation for the Host associated with the Service
+my $o_hostnotesurl     = $ENV{ICINGA_HOSTNOTESURL};
+
+# The next variables are provided through args
+my $o_cc_recipients    = undef; # The recipients defined in $CONTACTADDRESS1$
+my $o_bcc_recipients   = undef; # The recipients defined in $CONTACTADDRESS2$
+my $o_format           = "text";# The e-mail output format (default: text)
+my $o_addurl           = undef; # flag to add Icinga GUI URLs to HTML e-mails
+my $o_language         = "en";  # The e-mail output language (default: English)
+my $o_customer         = "Howler Monitoring Tools"; # Company name and contract number for service providers
+my $o_help             = undef; # We want help
+my $o_verb             = undef; # verbose mode
+my $o_version          = undef; # print version
+my $o_test             = undef; # generate test message
+my $text_msg_en        = undef;
+my $html_msg_en        = undef;
+my $text_msg_jp        = undef;
+my $html_msg_jp        = undef;
+my $logo_id            = undef;
+my $graph_id           = undef;
+my $graph_img          = undef;
+my $boundary           = undef;
+my $mail_content       = undef;
+my %mail;
+
+
+# ########################################################################
+# subroutine defintions below
+# ########################################################################
+
+# ########################################################################
+# p_version returns the program version
+# ########################################################################
+sub p_version { print "pnp4n_send_service_mail.pl version : $Version\n"; }
+
+# ########################################################################
+# print_usage returns the program usage
+# ########################################################################
+sub print_usage {
+    print "Usage: $0 [-v] [-V] [-h] [-t] [-H <SMTP host>] [-p <customername>] [-r <to_recipients>] [-c <cc_recipients>] [-b <bcc_recipients>] [-f <text|html|multi|graph>] [-u] [-l <en|jp>]\n";
+}
+
+# ########################################################################
+# help returns the program help message
+# ########################################################################
+sub help {
+   print "\nNagios e-mail notification script for service events, version ",$Version,"\n";
+   print "GPL licence, (c)2010 Frank Migge\n\n";
+   print_usage();
+   print <<EOT;
+
+This script takes over the Nagios e-mail notifications by receiving the Nagios state information, formatting the e-mail and sending it out through an SMTP gateway.
+
+-v, --verbose
+   print extra debugging information 
+-V, --version
+   prints version number
+-h, --help
+   print this help message
+-t, --test
+   generates a test message together with -r, --to-recipients
+-H, --smtphost=HOST
+   name or IP address of SMTP gateway
+-p, --customer="customer name and contract #"
+  optionally, add the customer name and contract for service providers
+-r, --to-recipients
+   this option overrides the Nagios-provided \$CONTACTEMAIL\$ list of to: recipients
+-c, --cc-recipients
+   the Nagios-provided \$CONTACTADDRESS1\$ list of cc: recipients
+-b, --bcc-recipients
+   the Nagios-provided \$CONTACTADDRESS2\$ list of bcc: recipients
+-f, --format='text|html|multi|graph'
+   the email format to generate: either plain text,, HTML, multipart S/MIME and multipart adding the Nagiosgraph image
+-u, --addurl
+   this adds URL's to the Nagios web GUI for check status, host and hostgroup views into the html mail, requires -f html or -f multi
+-l, --language='en|jp'
+   the prefered e-mail language. The content-type header is currently is hard-coded to UTF-8. This might need to be changed if recipients require a different characterset encoding.
+
+EOT
+}
+
+# ########################################################################
+# verb creates verbose output
+# ########################################################################
+sub verb { my $t=shift; print $t,"\n" if defined($o_verb) ; }
+
+# ########################################################################
+# unique content ID are needed for multipart messages with inline logos
+# ########################################################################
+sub create_content_id {
+  my $unique_string  = rand(100);
+  $unique_string  = $unique_string . substr(md5_hex(time()),0,23);
+  $unique_string  =~ s/(.{5})/$1\./g;
+  my $content_id     = qq(part.${unique_string}\@) . "MAIL";
+  $unique_string  = undef;
+  return $content_id;
+}
+
+# ########################################################################
+# create_boundary creates the S/MIME multipart boundary strings
+# ########################################################################
+sub create_boundary {
+  my $unique_string  = substr(md5_hex(time()),0,24);
+  $boundary       = '======' . $unique_string ;
+  $unique_string  = undef;
+}
+
+sub unknown_arg {
+  print_usage();
+  exit -1;
+}
+
+# ########################################################################
+# check_options checks and processes the commandline options given
+# ########################################################################
+sub check_options {
+  Getopt::Long::Configure ("bundling");
+  GetOptions(
+      'v'     => \$o_verb,            'verbose'           => \$o_verb,
+      'V'     => \$o_version,         'version'           => \$o_version,
+      'h'     => \$o_help,            'help'              => \$o_help,
+      't'     => \$o_test,            'test'              => \$o_test,
+      'H:s'   => \$o_smtphost,        'smtphost:s'        => \$o_smtphost,
+      'p:s'   => \$o_customer,        'customer:s'        => \$o_customer,
+      'r:s'   => \$o_to_recipients,   'to-recipients:s'   => \$o_to_recipients,
+      'c:s'   => \$o_cc_recipients,   'cc-recipients:s'   => \$o_cc_recipients,
+      'b:i'   => \$o_bcc_recipients,  'bcc-recipients:s'  => \$o_bcc_recipients,
+      'f:s'   => \$o_format,          'format:s'          => \$o_format,
+      'u'     => \$o_addurl,          'addurl'            => \$o_addurl,
+      'l:s'   => \$o_language,        'language:s'        => \$o_language,
+  ) or unknown_arg();
+  # Basic checks
+  if (defined ($o_help) ) { help(); exit 0};
+  if (defined($o_version)) { p_version(); exit 0};
+  if ( ! defined($o_to_recipients) ) # no recipients provided
+    { print "Error: no recipients have been provided\n"; print_usage(); exit -1}
+  else {
+    %mail = (
+      To      => $o_to_recipients,
+      From    => $mail_sender,
+      Sender  => $mail_sender
+    );
+  }
+  if ( $o_format ne "text" && $o_format ne "html"
+    && $o_format ne "multi" && $o_format ne "graph") # wrong mail format
+    { print "Error: wrong e-mail format.\n"; print_usage(); exit -1}
+  if ( $o_language ne "en" && $o_language ne "jp" ) # wrong language
+    { print "Error: wrong language id.\n"; print_usage(); exit -1}
+  if (defined($o_addurl) && $o_format eq "text")
+    { print "Error: cannot add URL's to text.\n"; print_usage(); exit -1}
+  if (defined($o_test)) { create_test_data(); };
+  # we try to create a graph image based on the hostname and servicedesc information
+  if ($o_format eq "graph") { $graph_img = create_graph_image(); }
+}
+
+# ########################################################################
+# if -x or --test, we need to create sample test data to send out
+# In order to successfully test a e-mail with performance graph generation
+# set a valid hostname and servicedesc to be able to pick up a RRD file.
+# ########################################################################
+sub create_test_data {
+  if (! defined($o_customer)){         $o_customer         = "ACME Corporation";}
+  if (! defined($o_notificationtype)){ $o_notificationtype = "TEST";}
+  if (! defined($o_servicestate)){     $o_servicestate     = "UNKNOWN";}
+  if (! defined($o_hostname)){         $o_hostname         = "localhost";}
+  if (! defined($o_hostalias)){        $o_hostalias        = "localhost (Monitoring)";}
+  if (! defined($o_hostaddress)){      $o_hostaddress      = "192.168.1.1";}
+  if (! defined($o_hostgroup)){        $o_hostgroup        = "Monitoring";}
+  if (! defined($o_servicedesc)){      $o_servicedesc      = "Base - CPU Load";}
+  if (! defined($o_servicegroup)){     $o_servicegroup     = "Performance Checks";}
+# if (! defined($o_datetime)){         $o_datetime         = "Thu Jan 6 12:08:04 JST 2011";}
+  if (! defined($o_datetime)){         $o_datetime         = `date`;}
+#  if (! defined($o_datetime))         {$o_datetime         = localtime time;}
+  if (! defined($o_serviceoutput)){    $o_serviceoutput    = "Test output for this service";}
+  if (! defined($o_notificationauth)){ $o_notificationauth = "John Doe";}
+  if (! defined($o_notificationcmt)){  $o_notificationcmt  = "Test message for the service";}
+}
+
+# ########################################################################
+# Create a plaintext message in English -> $text_msg_en
+# ########################################################################
+sub create_message_en_text {
+  $text_msg_en = "Icinga Monitoring- $hostname\n"
+               . "=====================================\n\n";
+
+
+  # if customer name was given for service providers, display it here
+  if ( defined($o_customer)) {
+    $text_msg_en = $text_msg_en . "Customer: $o_customer\n";
+  }
+
+  $text_msg_en = $text_msg_en
+               . "Notification Type: $o_notificationtype\n"
+               . "Service Name: $o_servicedesc\n"
+               . "Service Status: $o_servicestate\n"
+               . "Service Group: $o_servicegroup\n"
+               . "Service Data: $o_serviceoutput\n\n"
+               . "Hostname: $o_hostname\n"
+               . "Hostalias: $o_hostalias\n"
+               . "IP Address: $o_hostaddress\n"
+               . "Hostgroup: $o_hostgroup\n"
+               . "Event Time: $o_datetime\n\n";
+
+  # if author and comment data has been passed from nagios
+  # and these variables have content, then we add two more columns
+  if ( ( defined($o_notificationauth) && defined($o_notificationcmt) ) &&
+       ( ($o_notificationauth ne "") && ($o_notificationcmt ne "") ) ) {
+    $text_msg_en = $text_msg_en . "Author: $o_notificationauth\n"
+                 . "Comment: $o_notificationcmt\n\n";
+  }
+
+  $text_msg_en = $text_msg_en . "-------------------------------------\n"
+               . "Generated by Icinga Server - $hostname\n";
+}
+
+# ########################################################################
+# Create a simple HTML message in English -> $html_msg_en
+# ########################################################################
+sub create_message_en_html {
+# Start HTML message definition in English
+  $html_msg_en = "<html><head><style type=\"text/css\">$html_style</style></head><body>\n"
+               . "<table width=$table_size><tr>\n";
+
+  if ($o_format eq "multi" || $o_format eq "graph") {
+    $logo_id = create_content_id();
+    $html_msg_en = $html_msg_en . "<td><img class=\"logo\" src=\"cid:$logo_id\"></td>"
+                 . "<td><span>Icinga - $hostname</span></td></tr><tr>\n";
+  } else {
+    $html_msg_en = $html_msg_en . "<th colspan=2><span>Icinga Monitoring System Notification</span></th></tr><tr>\n";
+  }
+
+  if ( defined($o_customer)) {
+    $html_msg_en = $html_msg_en . "<th colspan=2 class=customer>$o_customer</th></tr><tr>\n";
+  }
+
+  $html_msg_en = $html_msg_en
+               . "<th width=$header_size class=even>Notification Type:</th>\n"
+               . "<td bgcolor=$NOTIFICATIONCOLOR{$o_notificationtype}>\n"
+               . "<b>$o_notificationtype</b></td></tr>\n"
+               . "<tr><th class=odd>Service Name:</th><td>$o_servicedesc</td></tr>\n"
+               . "<tr><th class=even>Service Group:</th><td class=even>\n";
+
+  # The Servicegroup URL http://<nagios-web>/cgi-bin/status.cgi?servicegroup=$SERVICEGROUPNAME$&style=overview
+  # This URL shows the service group table listing the hosts that have this service
+  if (defined($o_addurl)) {
+    $html_msg_en = $html_msg_en
+                 . "<a href=\"$icinga_cgiurl/status.cgi?servicegroup=$o_servicegroup&style=overview\">$o_servicegroup</a>";
+  } else { $html_msg_en  = $html_msg_en . $o_servicegroup; }
+
+  $html_msg_en = $html_msg_en . "</td></tr>\n"
+               . "<tr><th class=odd>Service State:</th><td bgcolor=$PROBLEMCOLOR{$o_servicestate}><b>$o_servicestate</b></td></tr>\n"
+               . "<tr><th class=even>Service Data:</th><td class=even>\n";
+
+  # The ServiceOutput URL http://<nagios-web>/cgi-bin/extinfo.cgi?type=2&host=$HOSTNAME$&service=$SERVICEDESC$
+  # This URL shows the full service details and commands for service management (ack, re-check, disable, etc)
+  if (defined($o_addurl)) {
+    $html_msg_en = $html_msg_en 
+                 . "<a href=\"$icinga_cgiurl/extinfo.cgi?type=2&host=$o_hostname&service=$o_servicedesc\">$o_serviceoutput</a>\n";
+  } else { $html_msg_en = $html_msg_en . $o_serviceoutput; }
+  
+  $html_msg_en = $html_msg_en . "</td></tr>\n"
+               . "<tr><th class=odd>Host Name:</th><td>\n";
+
+  # The Hostname URL http://<nagios-web>/cgi-bin/status.cgi?host=$HOSTNAME$&style=detail
+  # this URL shows the host and all services underneath it
+  if (defined($o_addurl)) {
+    $html_msg_en = $html_msg_en
+                 . "<a href=\"$icinga_cgiurl/status.cgi?host=$o_hostname&style=detail\">$o_hostname</a>";
+  } else { $html_msg_en  = $html_msg_en . $o_hostname; }
+  
+  $html_msg_en = $html_msg_en . "</td></tr>\n"
+               . "<tr><th class=even>Hostalias:</th><td class=even>$o_hostalias</td></tr>\n"
+               . "<tr><th class=odd>IP Address:</th><td>$o_hostaddress</td></tr>\n"
+               . "<tr><th class=even>Hostgroup:</th><td class=even>\n";
+  
+  # The Hostgroup URL http://<nagios-web>/cgi-bin/status.cgi?hostgroup=$HOSTGROUPNAME$&style=overview
+  # This URL shows the hostgroup table listing all individual hosts that belong to it
+  if (defined($o_addurl)) {
+    $html_msg_en = $html_msg_en
+                 . "<a href=\"$icinga_cgiurl/status.cgi?hostgroup=$o_hostgroup&style=overview\">$o_hostgroup</a>";
+  } else { $html_msg_en = $html_msg_en . $o_hostgroup; }
+  
+  
+ # -----------------New Documentation Field and URL Link on Notification E-Mail ----------------------------
+  $html_msg_en = $html_msg_en . "<td></tr>\n"
+               . "<tr><th class=odd>Documentation:</th><td class=odd></td></tr>\n";
+
+  if (defined($o_addurl)) {
+    $html_msg_en = $html_msg_en
+                . "<a href=\"$o_hostnotesurl\">Monitoring Wiki Entry</a>";
+  } else { $html_msg_en = $html_msg_en . $o_hostnotesurl; }
+
+ # -----------------New Documentation Field - END-----------------------------------------------------------
+
+ # -----------------New Performance Data Field and URL Link on Notification E-Mail ----------------------------
+  $html_msg_en = $html_msg_en
+              . "<tr><th class=even>Performance Data:</th><td class=even></td></tr>\n";
+
+  if (defined($o_addurl)) {
+    $html_msg_en = $html_msg_en
+                . "<a href=\"https://$hostname/pnp4nagios/index.php/graph?host=$o_hostname\">Host and Service Graphs</a>";
+  } else { $html_msg_en = $html_msg_en . "https://$hostname/pnp4nagios/index.php/graph?host=$o_hostname"; }
+
+ # -----------------New Performance Data Field - END-----------------------------------------------------------
+
+
+  $html_msg_en = $html_msg_en . "</td></tr>\n"
+               . "<tr><th class=odd>Event Time:</th><td>$o_datetime</td></tr>\n";
+
+  # if author and comment data has been passed from nagios
+  # and these variables have content, then we add two more columns
+  if ( ( defined($o_notificationauth) && defined($o_notificationcmt) ) &&
+       ( ($o_notificationauth ne "") && ($o_notificationcmt ne "") ) ) {
+    $html_msg_en = $html_msg_en . "<tr><th class=even>Author:</th>\n"
+                 . "<td class=even>$o_notificationauth</td></tr>\n"
+                 . "<tr><th class=odd>Comment:</th>\n"
+                 . "<td>$o_notificationcmt</td></tr>";
+  }
+
+  $html_msg_en = $html_msg_en . "</table><p>\n";
+
+  # if we got the graph format and a image has been generated, we add it here
+#  if (defined($graph_img) && $o_format eq "graph") {
+#    $graph_id = create_content_id();
+#    $html_msg_en = $html_msg_en . "<img src=\"cid:$graph_id\">\n";
+#  } 
+
+  # if we got the graph format and a image has been generated, we add it here
+  if (defined($graph_img) && $o_format eq "graph") {
+    $graph_id = create_content_id();
+    $html_msg_en = $html_msg_en . "<img class=\"graph\" src=\"cid:$graph_id\">\n";
+  }
+
+  $html_msg_en = $html_msg_en #. "</p><hr>\n"
+               . "<p>Generated by Icinga Server - $hostname\n"
+               #. "<hr>\n"
+               . "</center></body></html>\n";
+  # End HTML message definition in English
+}
+
+
+# #######################################################################
+# urlencode() URL encode a string
+# #######################################################################
+sub urlencode {
+  $_[0] =~ s/([\W])/"%" . uc(sprintf("%2.2x",ord($1)))/eg;
+  return $_[0];
+}
+# #######################################################################
+# hashcolor() Choose a color for service
+# #######################################################################
+sub hashcolor {
+  my $c=0;
+  map{$c=(51*$c+ord)%(216)}split//,"$_[0]x";
+  my $i = 0;
+  my $n = 0;
+  my $m = 0;
+  my @h=(51*int $c/36,51*int $c/6%6,51*($c%6));
+  for$i(0..2){$m=$i if$h[$i]<$h[$m];$n=$i if$h[$i]>$h[$n]}
+  $h[$m]=102if$h[$m]>102;$h[$n]=153if$h[$n]<153;
+  $c=sprintf"%06X",$h[2]+$h[1]*256+$h[0]*16**4;
+  return $c;
+}
+# #######################################################################
+# dbfilelist() Get list of matching rrd files
+# #######################################################################
+sub dbfilelist {
+
+  my($host,$service, $rrddir) = @_;
+  my $hs;
+  my $clean_service;
+
+  $service = $o_servicedesc if ($o_servicedesc);
+  
+  # PNP4Nagios replaces spaces in the service description with underscores
+  # We do the same, and in addition we replace ':' and '/' with '_' as well
+  ($clean_service = $service) =~ s/[ ,:]/_/g;
+  ($clean_service = $clean_service) =~ s/\//_/g;
+
+  $rrddir .=  "/" . $host;
+  $hs = "$clean_service";
+  
+  verb("Service Name: $hs");
+  verb("sub dbfilelist: Checking files inside directory: ".$rrddir);
+
+  # The old rrd array below is commented out because it was
+  # not working as intended
+  # Original Code: @rrd = grep s/^${hs}(.+)\.rrd$/$1/, readdir DH;
+
+  my @rrd;
+  opendir DH, $rrddir;
+  @rrd = $hs . ".rrd", readdir DH; 
+  verb("sub dbfilelist: Found file: ".$rrd[0]);
+  closedir DH;
+  verb("sub dbfilelist: We found number of files: ".@rrd);
+  return @rrd;
+}
+# #######################################################################
+# graphinfo() Find graphs and values
+# #######################################################################
+sub graphinfo {
+  my($host,$service,$rrddir) = @_;
+  my(@rrd,$ds,$f,$dsout,@values,$hs,%H,%R);
+  my $clean_service;
+
+  $service = $o_servicedesc if ($o_servicedesc);
+
+  # PNP4Nagios replaces spaces in the service description with underscores
+  # We do the same, and in addition we replace ':' and '/' with '_' as well
+  ($clean_service = $service) =~ s/[ ,:]/_/g;
+  ($clean_service = $clean_service) =~ s/\//_/g;
+
+  $hs = $host . "/";
+  $hs .= "$clean_service";
+
+  verb("Service Name: $hs");
+
+  # Determine which files to read lines from
+  # The map function below was modified to stop double appending the file name.
+  # Original Code:  map { "${hs}${_}.rrd" }
+
+  @rrd = map {{ file=>$_ }}
+           map { "${hs}.rrd" }
+           dbfilelist($host,$service, $rrddir);
+  # we stop processing here if we could not find a file
+  if (@rrd < 1) {
+    verb("sub graphinfo: Could not find any graph file.");
+    return undef;
+  } else {
+    verb("sub graphinfo: Listing $hs db files in $rrddir: "
+           . join ', ', map { $_->{file} } @rrd);
+  }
+
+  for $f ( @rrd ) {
+    unless ( $f->{line} ) {
+      $ds = RRDs::info "$rrddir/$f->{file}";
+      verb("sub graphinfo: RRDs::info ERR " . RRDs::error) if RRDs::error;
+      map { $f->{line}{$_} = 1}
+      grep {!$H{$_}++}
+      map { /ds\[(.*)\]/; $1 }
+      grep /ds\[(.*)\]/,
+      keys %$ds;
+    }
+    verb("DS $f->{file} lines: " . join ', ', keys %{ $f->{line} } );
+  }
+  return \@rrd;
+}
+# #######################################################################
+# rrdline() Generate the rrd parameters to produce a graph
+# #######################################################################
+sub rrdline {
+  my($host,$service,$geom,$G,$rrddir,$tmpfile) = @_;
+  my($g,$f,$v,$c,@ds);
+  my $directory = $rrddir;
+
+  @ds = ($tmpfile, '-a', 'PNG', '-t', $service);
+  push @ds,  "--color=BACK$graph_bgcolor",
+             "--color=SHADEA$graph_border",
+             "--color=SHADEB$graph_border";
+
+  # Identify where to pull data from and what to call it
+  for $g ( @$G ) {
+    $f = $g->{file};
+    verb("file=$f");
+
+    # Compute the longest label length
+    my $longest = (sort map(length,keys(%{ $g->{line} })))[-1];
+
+    for $v ( sort keys %{ $g->{line} } ) {
+      $c = hashcolor($v);
+      verb("sub rrdline: file=$f line=$v color=$c");
+      my $sv = "$v";
+      my $label = sprintf("%-${longest}s", $sv);
+      push @ds , "DEF:$sv=$directory/$f:$v:AVERAGE"
+               , "LINE2:${sv}#$c:$label";
+      my $format = '%6.2lf%s';
+
+      # Graph labels
+      push @ds, "GPRINT:$sv:MAX:Max\\: $format"
+              , "GPRINT:$sv:AVERAGE:Avg\\: $format"
+              , "GPRINT:$sv:MIN:Min\\: $format"
+              , "GPRINT:$sv:LAST:Cur\\: ${format}\\n";
+    }
+  }
+
+  # Dimensions of graph if geom is specified
+  if ( $geom ) {
+    my($w,$h) = split 'x', $geom;
+    push @ds, '-w', $w, '-h', $h;
+  }
+  return @ds;
+}
+# ########################################################################
+# uuencode_image() takes the image file and returns a base64-image string
+# ########################################################################
+sub uuencode_image {
+  my($tmpfile) = @_;
+  open (IMG, $tmpfile) or die "Cannot read temporary image: $tmpfile - $!";
+    binmode IMG; undef $/;
+    my $uuencoded_img = encode_base64(<IMG>);
+  close IMG;
+  return $uuencoded_img;
+}
+# #######################################################################
+# create_graph_img() tries to create a base64-encoded performance graph
+# image. It takes the hostname and servicename and tries to find a
+# matching RRD file according to the Nagiosgraphs layout. If there is one,
+# queries the RRD information and graphs the last 24 hours similar to
+# Nagiosgraph.
+# #######################################################################
+sub create_graph_image {
+  my $img = undef;
+  my $G = undef;
+
+  # Figure out db files and line labels
+  $G = graphinfo($o_hostname,$o_servicedesc,$rrd_basedir);
+
+  # if we could not find RRD data, we return $img as undef
+  if(! defined($G)) {
+    verb("sub create_graph_image: graph format was requested, but no graph data was found.");
+    return $img;
+  }
+
+  # generate temporary graph files for todays RRD data
+  my $fh_raw = File::Temp->new();
+  my $bin_tmp_img = $fh_raw->filename;
+
+  my @ds = rrdline($o_hostname,$o_servicedesc,$graph_img_size,$G,$rrd_basedir,$bin_tmp_img);
+  verb("sub create_graph_image: RRDs::graph ". join ' ', @ds);
+
+
+  RRDs::graph(@ds);
+  verb("sub create_graph_image: RRDs::graph ERR " . RRDs::error) if RRDs::error;
+
+  # because our mail system being Notes, which is not supporting PNG
+  # images, we must convert them to JPG before we can continue.
+  # comment out the next 3 lines of PNG is OK
+   my $jpg_tmp_img = $bin_tmp_img.".jpg";
+  `pngtopnm $bin_tmp_img | pnmtojpeg >$jpg_tmp_img`;
+  `mv $jpg_tmp_img $bin_tmp_img`;
+
+  # Since the graph images are raw png files, we need to uuencode them
+  $img = uuencode_image($bin_tmp_img);
+  return $img;
+}
+# #######################################################################
+# main
+# #######################################################################
+check_options();
+
+$mail{Cc}   = $o_cc_recipients if $o_cc_recipients;
+$mail{Bcc}  = $o_bcc_recipients if $o_bcc_recipients;
+$mail{smtp} = $o_smtphost;
+
+my $mail_subject_en = "Icinga: $o_notificationtype service $o_servicedesc on $o_hostname ($o_hostgroup) is $o_servicestate";
+
+#my $mail_subject_jp = "Nagios ..: $o_notificationtype $o_hostname($o_hostgroup)..... $o_servicedesc $o_servicestate";
+#   $mail_subject_jp = "Nagios: $o_notificationtype service $o_servicedesc on $o_hostname ($o_hostgroup) is $o_servicestate";
+
+# Check lang and if we have been asked to format it in fancy HTML.
+# With the current setup, it will only be displayed correctly by
+# HTML-capable Mail clients since it has no "text/plain" alternative part.
+if ($o_language eq "en") {
+  $mail{subject} = $mail_subject_en;
+  if ($o_format eq "multi" || $o_format eq "graph") {
+    verb("Sending HTML email (English) with inline logo.");
+    create_message_en_html();
+    create_boundary();
+    $mail{'content-type'} = qq(multipart/related; boundary="$boundary");
+    $boundary = '--' . $boundary;
+    # Here we define the mail content to be send
+    $mail_content = "This is a multi-part message in MIME format.\n"
+    # create the first boundary start marker for the main message
+            . "$boundary\n"
+            . "Content-Type: text/html; charset=utf-8\n"
+            . "Content-Transfer-Encoding: 8bit\n\n"
+            . "$html_msg_en\n";
+
+    # create the second boundary marker for the logo
+    $mail_content = $mail_content . "$boundary\n"
+            . "Content-Type: image/gif; name=\"logo.gif\"\n"
+            . "Content-Transfer-Encoding: base64\n"
+            . "Content-ID: <$logo_id>\n"
+            . "Content-Disposition: inline; filename=\"logo.gif\"\n\n"
+            . "$logo\n";
+
+    # if we got the graph format and a image has been generated, we add it here
+    # create the third boundary marker for the graph
+    if (defined($graph_img) && $o_format eq "graph") {
+    $mail_content = $mail_content . "$boundary\n"
+            . "Content-Type: image/gif; name=\"graph.jpg\"\n"
+            . "Content-Transfer-Encoding: base64\n"
+            . "Content-ID: <$graph_id>\n"
+            . "Content-Disposition: inline; filename=\"graph.jpg\"\n\n"
+            . "$graph_img\n";
+    }
+
+    # create the final end boundary marker
+    $mail_content = $mail_content . "$boundary--\n";
+    # put the completed message body into the mail
+    $mail{body} = $mail_content;
+  }
+  elsif ($o_format eq "html") {
+    create_message_en_html();
+    $mail{'content-type'} = qq(text/html; charset="utf-8");
+    $mail{body} = $html_msg_en;
+  } else {
+    create_message_en_text();
+    $mail{'content-type'} = qq(text/plain; charset="utf-8");
+    $mail{body} = $text_msg_en;
+  } 
+}
+
+sendmail(%mail) or die $Mail::Sendmail::error;
+verb("Sendmail Log says:\n$Mail::Sendmail::log\n");
+exit 0;
+

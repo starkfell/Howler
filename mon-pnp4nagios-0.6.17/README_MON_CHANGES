@@ -1,0 +1,83 @@
+######################################################################
+#                                                                    #
+# [mon-pnp4nagios] - RPM CHANGE LOG                                  #
+#                                                                    #
+# Author:     R. Irujo                                               #
+# Inception:  05.01.2012                                             #
+#                                                                    #
+######################################################################
+
+11.25.2012 - [R. Irujo]
+	   - v1.7
+	   - The following files have been removed from the 'graph_templates' directory:
+	     'icinga_check_disk.php'
+	     'icinga_check_load.php'
+	     'icinga_check_process_count.php'
+	     'icinga_check_swap_percent.php'
+	     'icinga_check_users.php'
+
+	   - The following files have been renamed in the 'graph_templates' directory:
+	     'icinga_check_disk_v2.php'          to 'icinga_check_disk.php'
+	     'icinga_check_load_v2.php'          to 'icinga_check_load.php'
+	     'icinga_check_process_count_v2.php' to 'icinga_check_process_count.php'
+	     'icinga_check_swap_percent_v2.php'  to 'icinga_check_swap_percent.php'
+	     'icinga_check_users_v2.php'         to 'icinga_check_users.php'
+
+	   - A '$ds_value' variable has been added to the 'icinga_check_disk.php' file in order to
+	     display the Service Name in the Data Source field.
+
+
+11.30.2012 - [R. Irujo]
+	   - v1.6 
+	   - Version Number Updated.
+
+
+07.10.2012 - [R. Irujo]
+           - v1.5
+           - The following files have been added to the 'graph_templates' directory:
+             'icinga_check_mem_used.php'
+
+
+05.30.2012 - [R. Irujo]
+	   - v1.4
+	   - The following files have been added to the 'graph_templates' directory:
+             'icinga_check_load_v2.php' 
+             'icinga_check_process_count_v2.php'
+             'icinga_check_swap_percent_v2.php'
+             'icinga_check_users_v2.php'
+
+
+05.26.2012 - [R. Irujo]
+	   - v1.3
+	   - Added a new folder called 'graph_templates' into the 'monconfigs' directory
+             which is now used to store the custom PHP Graph Files.
+	   - The following files have been added to the 'graph_templates' directory:
+	     'icinga_check_disk_v2.php'
+	     'icinga_check_disk.php'
+             'icinga_check_swap_percent_v2.php'
+	   - The following files have been removed from the 'graph_templates' directory:
+	     'icinga_check_disk_old.php'
+
+
+05.24.2012 - [R. Irujo]
+	   - v1.2
+	   - Added the 'rrd_add_datasource' Perl Script to the 'monconfigs' directory.
+
+
+05.21.2012 - [R. Irujo]
+           - v1.1
+	   - Added the following 'PHP Files' to the 'monconfigs' directory:
+             'icinga_check_port.php'
+	     'icinga_check_ps_service.php'
+	     'icinga_check_service.php'
+	     'icinga_check_swap_percent.php'
+	     'check_local_users.php'
+           - Updated the exisiting 'PHP File' in the 'monconfigs' directory:
+	     'icinga_check_users.php'
+
+
+05.01.2012 - [R. Irujo]
+	   - v1.0
+	   - Inception
+
+

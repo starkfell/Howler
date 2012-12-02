@@ -1,0 +1,754 @@
+body
+{
+	background-color: #eeeeee;
+	color: #333333;
+	font-family: Tahoma, Arial, Sans-Serif;
+}
+
+.small {
+	font-family: Tahoma, Arial, Sans-Serif;
+	font-size: 8pt;
+}
+
+.formcell {
+	padding-top: 5px;
+	padding-left: 5px;
+	padding-bottom: 5px;
+	padding-right: 5px;
+	font-family: Tahoma, Arial, Sans-Serif;
+}
+
+input {
+	font-size: 8pt;
+	font-family: Tahoma, Arial, Sans-Serif;
+}
+
+select {
+	font-size: 8pt;
+	font-family: Tahoma, Arial, Sans-Serif;
+}
+
+td.description {
+	font-size: 8pt;
+	font-family: Tahoma, Arial, Sans-Serif;
+}
+
+td
+{
+	font-family: Tahoma, Arial, Sans-Serif;
+	font-size: 8pt;
+	color: black;
+}
+
+td.navbar {
+	color: white;
+	font-family: Tahoma, Arial, Sans-Serif;
+}
+
+td.titlebar {
+	color: white;
+	letter-spacing: 1px;
+	font-size: 15pt;
+	font-weight: none;
+	font-family: Tahoma, Arial, Sans-Serif;
+}
+
+td.windowtitlebar {
+	color: white;
+	letter-spacing: 1px;
+	font-weight: none;
+	font-family: Tahoma, Arial, Sans-Serif;
+}
+
+.header
+{
+	font-family: Tahoma, Arial, Sans-Serif;
+	letter-spacing: 2px;
+	font-size: 14pt;
+	color: #333333;
+	padding-top: 5px;
+	font-weight: bold;
+}
+
+.subheader {
+	color: #333333;
+}
+
+.strongheader
+{
+	font-family: Tahoma, Arial, Sans-Serif;
+	letter-spacing: 2px;
+	font-size: 16pt;
+	color: black;
+	padding-top: 5px;
+	font-weight: bold;
+}
+
+.statusmsg
+{
+	color: red;
+	font-family: Tahoma, Arial, Sans-Serif;
+}
+
+.qty
+{
+	font-family: Tahoma, Arial, Sans-Serif;
+	font-size: 10pt;
+	color: #666666;
+	font-weight: bold;
+}
+
+.req
+{
+	font-family: Tahoma, Arial, Sans-Serif;
+	font-size: 10pt;
+	color: #000000;
+	font-style: italic;
+	font-weight: bold;
+}
+
+.smallreq
+{
+	font-family: Tahoma, Arial, Sans-Serif;
+	font-size: 8pt;
+	color: #000000;
+	font-style: italic;
+	font-weight: bold;
+}
+
+
+
+.blue
+{
+	font-family: Tahoma, Arial, Sans-Serif;
+	font-size: 10pt;
+	color: #003399;
+}
+
+h1
+{
+	font-family: Tahoma, Arial, Sans-Serif;
+	font-size: 10pt;
+	color: #000000;
+	padding: 0px;
+	margin: 1px;
+}
+
+h2
+{
+	font-family: Tahoma, Arial, Sans-Serif;
+	font-size: 12pt;
+	color: #FFFFFF;
+	padding: 0px;
+	margin: 1px;
+}
+
+h3
+{
+	font-family: Tahoma, Arial, Sans-Serif;
+	font-size: 12pt;
+	color: #000000;
+	padding: 0px;
+	margin: 1px;
+}
+
+.small
+{
+	font-family: Tahoma, Arial, Sans-Serif;
+	font-size: 8pt;
+	color: #000000;
+}
+
+.smallwhite
+{
+	font-family: Tahoma, Arial, Sans-Serif;
+	font-size: 8pt;
+	color: #ffffff;
+}
+
+.smallred
+{
+	font-family: Tahoma, Arial, Sans-Serif;
+	font-size: 8pt;
+	color: Red;
+	font-weight: bold;
+}
+
+.soldout
+{
+	font-family: Tahoma, Arial, Sans-Serif;
+	font-size: 10pt;
+	color: Red;
+	font-weight: bold;
+}
+
+.brokered
+{
+	font-family: Tahoma, Arial, Sans-Serif;
+	font-size: 10pt;
+	color: #003399;
+	font-weight: bold;
+}
+
+.special
+{
+	font-family: Tahoma, Arial, Sans-Serif;
+	font-size: 10pt;
+	color: Green;
+	font-weight: bold;
+}
+
+.tiny
+{
+	font-family: Tahoma, Arial, Sans-Serif;
+	font-size: 7pt;
+	color: #000000;
+}
+
+.tinywhite
+{
+	font-family: Tahoma, Arial, Sans-Serif;
+	font-size: 7pt;
+	color: #ffffff;
+}
+
+.releasetitle
+{
+	font-family: Tahoma, Arial, Sans-Serif;
+	font-size: 10pt;
+	color: #000000;
+	font-weight: bold;
+	text-align: center;
+	text-transform: uppercase;
+}
+
+.releasesubtitle
+{
+	font-family: Tahoma, Arial, Sans-Serif;
+	font-size: 10pt;
+	color: #000000;
+	font-weight: normal;
+	font-style: italic;
+	text-align: center;
+}
+
+
+a.headerlink
+{
+	font-family: Tahoma, Arial, Sans-Serif;
+	font-size: 8pt;
+	color: white;
+	font-weight: none;
+
+	text-decoration: none;
+}
+
+a.sublink {
+	font-size: 8pt;
+}
+
+a.headerlink:hover
+{
+	font-family: Tahoma, Arial, Sans-Serif;
+	color: white;
+	text-decoration: underline;
+}
+
+a.bold
+{
+	font-family: Tahoma, Arial, Sans-Serif;
+	color: #000000;
+	font-weight: bold;
+	text-decoration: none;
+}
+
+a.bold:hover
+{
+	font-family: Tahoma, Arial, Sans-Serif;
+	color: #000000;
+	text-decoration: underline;
+}
+
+a.smallbold
+{
+	font-family: Tahoma, Arial, Sans-Serif;
+	font-size: 8pt;
+	color: #000000;
+	font-weight: bold;
+	text-decoration: none;
+}
+
+a.smallbold:hover
+{
+	font-family: Tahoma, Arial, Sans-Serif;
+	font-size: 8pt;
+	color: #000000;
+	text-decoration: underline;
+}
+
+a.bold2
+{
+	font-family: Tahoma, Arial, Sans-Serif;
+	font-size: 12pt;
+	color: #000000;
+	font-weight: bold;
+	text-decoration: none;
+}
+
+a.bold2:hover
+{
+	font-family: Tahoma, Arial, Sans-Serif;
+	font-size: 12pt;
+	color: #000000;
+	text-decoration: underline;
+}
+
+
+a.whitebold
+{
+	font-family: Tahoma, Arial, Sans-Serif;
+	font-size: 10pt;
+	color: #ffffff;
+	font-weight: bold;
+	text-decoration: none;
+}
+
+a.whitebold:hover
+{
+	font-family: Tahoma, Arial, Sans-Serif;
+	font-size: 10pt;
+	color: #ffffff;
+	text-decoration: underline;
+}
+
+a.whitebold2
+{
+	font-family: Tahoma, Arial, Sans-Serif;
+	font-size: 12pt;
+	color: #ffffff;
+	font-weight: bold;
+	text-decoration: none;
+}
+
+a.whitebold2:hover
+{
+	font-family: Tahoma, Arial, Sans-Serif;
+	font-size: 12pt;
+	color: #ffffff;
+	text-decoration: underline;
+}
+
+a.bluebold
+{
+	font-family: Tahoma, Arial, Sans-Serif;
+	font-size: 10pt;
+	color: #003399;
+	font-weight: bold;
+	text-decoration: none;
+}
+
+a.bluebold:hover
+{
+	font-family: Tahoma, Arial, Sans-Serif;
+	font-size: 10pt;
+	color: #003399;
+	text-decoration: underline;
+}
+
+a.nav
+{
+	font-family: Tahoma, Arial, Sans-Serif;
+	font-size: 8pt;
+	color: #003399;
+	font-weight: normal;
+	text-decoration: none;
+	text-transform: uppercase;
+}
+
+a.nav:hover
+{
+	font-family: Tahoma, Arial, Sans-Serif;
+	font-size: 8pt;
+	color: #003399;
+	font-weight: normal;
+	text-decoration: underline;
+	text-transform: uppercase;
+}
+
+a.small
+{
+	font-family: Tahoma, Arial, Sans-Serif;
+	font-size: 8pt;
+	color: #000000;
+	font-weight: normal;
+	text-decoration: none;
+}
+
+a.small:hover
+{
+	font-family: Tahoma, Arial, Sans-Serif;
+	font-size: 8pt;
+	color: #000000;
+	font-weight: normal;
+	text-decoration: underline;
+}
+
+a.smallgreen
+{
+	font-family: Tahoma, Arial, Sans-Serif;
+	font-size: 8pt;
+	color: Green;
+	font-weight: bold;
+	text-decoration: none;
+}
+
+a.smallgreen:hover
+{
+	font-family: Tahoma, Arial, Sans-Serif;
+	font-size: 8pt;
+	color: Green;
+	font-weight: bold;
+	text-decoration: underline;
+}
+
+a.white
+{
+	font-family: Tahoma, Arial, Sans-Serif;
+	font-size: 10pt;
+	color: #FFFFFF;
+	font-weight: normal;
+	text-decoration: none;
+}
+
+a.white:hover
+{
+	font-family: Tahoma, Arial, Sans-Serif;
+	font-size: 10pt;
+	color: #FFFFFF;
+	font-weight: normal;
+	text-decoration: underline;
+}
+
+a.smallwhite
+{
+	font-family: Tahoma, Arial, Sans-Serif;
+	font-size: 8pt;
+	color: #FFFFFF;
+	font-weight: normal;
+	text-decoration: none;
+}
+
+a.smallwhite:hover
+{
+	font-family: Tahoma, Arial, Sans-Serif;
+	font-size: 8pt;
+	color: #FFFFFF;
+	font-weight: normal;
+	text-decoration: underline;
+}
+
+a.tiny
+{
+	font-family: Tahoma, Arial, Sans-Serif;
+	font-size: 7pt;
+	color: #000000;
+	font-weight: normal;
+	text-decoration: none;
+}
+
+a.tiny:hover
+{
+	font-family: Tahoma, Arial, Sans-Serif;
+	font-size: 7pt;
+	color: Gray;
+	font-weight: normal;
+	text-decoration: none;
+}
+
+a.bid
+{
+	font-family: Tahoma, Arial, Sans-Serif;
+	font-size: 10pt;
+	color: #ff8000;
+	font-weight: bold;
+	text-decoration: none;
+	cursor: hand;
+	text-shadow : Black;
+}
+
+ul
+{
+   font-family: Tahoma, Arial, Sans-Serif;
+	padding: 0px;
+	margin: 10px;
+}
+
+li
+{
+	list-style: square;
+	padding: 0px;
+	margin: 5px;
+	font-family: Tahoma, Arial, Sans-Serif;
+}
+
+li.bold
+{
+	list-style: square;
+	padding: 0px;
+	margin: 3px;
+	font-family: Tahoma, Arial, Sans-Serif;
+	font-size: 10pt;
+	font-weight: bold;
+	color: #000000;
+}
+
+.formheader
+{  
+	background-color: #1b4ebf;
+	font-family: Tahoma, Arial, Sans-Serif;
+	font-size: 10pt;
+	color: #ffffff;
+	font-weight: bold;
+	padding: 2px;
+}
+
+
+.bgwhite
+{
+	background-color: #ffffff;
+	color: #003399;
+	font-family: Tahoma, Arial, Sans-Serif;
+}
+
+.bgyellow
+{
+	background-color: #ffb300;
+	font-family: Tahoma, Arial, Sans-Serif;
+}
+
+.bgltyellow
+{
+	background-color: #ffff7f;
+	font-family: Tahoma, Arial, Sans-Serif;
+}
+
+.bgdkblue
+{
+	background-color: #003399;
+	font-family: Tahoma, Arial, Sans-Serif;
+	color: #ffffff;
+}
+
+.bgmdblue
+{
+	background-color: #3366cc;
+	font-family: Tahoma, Arial, Sans-Serif;
+	color: #ffffff;	
+}
+
+.bgmdltblue
+{
+	background-color: #6991db;
+	font-family: Tahoma, Arial, Sans-Serif;
+}
+
+.bgltblue
+{
+	background-color: #99b2e5;
+	font-family: Tahoma, Arial, Sans-Serif;
+}
+
+.bggreen
+{
+	background-color: #66cc00;
+	font-family: Tahoma, Arial, Sans-Serif;
+}
+
+.bgltgreen
+{
+	background-color: #b2ff65;
+	font-family: Tahoma, Arial, Sans-Serif;
+}
+
+.bgorange
+{
+	background-color: #ff8000;
+	font-family: Tahoma, Arial, Sans-Serif;
+}
+
+.bgltorange
+{
+	background-color: #ffc828;
+	font-family: Tahoma, Arial, Sans-Serif;
+}
+
+.bgred
+{
+	background-color: #990000;
+	font-family: Tahoma, Arial, Sans-Serif;
+	color: #ffffff;
+	
+}
+
+.bgltred
+{
+	background-color: #d69999;
+	font-family: Tahoma, Arial, Sans-Serif;
+}
+
+.bgblack
+{
+	background-color: #000000;
+	font-family: Tahoma, Arial, Sans-Serif;
+}
+
+hr
+{
+	color: #000000;
+	height: 1px;
+	font-family: Tahoma, Arial, Sans-Serif;
+}
+
+.dots
+{
+	font-family: Tahoma, Arial, Sans-Serif;
+	font-size: 10pt;
+	color: #000000;
+}
+
+.input
+{ 
+	font-family: Tahoma, Arial, Sans-Serif;
+	font-size: 8pt;
+	width: 150px;
+	height: 20px;	
+}
+
+.textarea
+{ 
+	font-family: Tahoma, Arial, Sans-Serif;
+	font-size: 8pt;
+	width: 400px;
+	height: 60px;
+}
+
+.errHilite
+{
+	font-family: Tahoma, Arial, Sans-Serif;
+	font-size: 8pt;
+	background-color: #ffff7f;
+	border: 1px;
+	border-color: Black;
+	border-style : solid;
+}
+
+.inputstate
+{ 
+	font-family: Tahoma, Arial, Sans-Serif;
+	font-size: 8pt;
+	width: 50px;
+	height: 20px;	
+}
+
+.inputshort
+{ 
+	font-family: Tahoma, Arial, Sans-Serif;
+	font-size: 8pt;
+	width: 120px;
+	height: 20px;	
+}
+
+.inputlong
+{ 
+	font-family: Tahoma, Arial, Sans-Serif;
+	font-size: 8pt;
+	width: 250px;
+	height: 20px;	
+}
+
+.tel3
+{ 
+	font-family: Tahoma, Arial, Sans-Serif;
+	font-size: 8pt;
+	width: 24px;
+	height: 20px;	
+}
+
+.tel4
+{ 
+	font-family: Tahoma, Arial, Sans-Serif;
+	font-size: 8pt;
+	width: 32px;
+	height: 20px;	
+}
+
+.button
+{
+	font-family: Tahoma, Arial, Sans-Serif;
+	font-size: 8pt;
+	font-weight: bold;
+	height: 18px;
+	text-align : center;
+	color: #ffffff;
+	background-color: #000000;
+	border-color: #88c1e0;
+	border-width: 1px;
+	border-style: outset;
+	margin: 1px;
+	margin-bottom: 0px;
+	padding-bottom: 0px;
+}
+
+ol
+{  
+	margin-bottom: 0px;
+	margin-left: 30px;
+	margin-top: 0px;
+	font-family: Tahoma, Arial, Sans-Serif;
+}
+
+.onetab
+{  
+	margin-left: 20px;
+	font-family: Tahoma, Arial, Sans-Serif;
+}
+
+.twotab
+{  
+	margin-left: 40px;
+	font-family: Tahoma, Arial, Sans-Serif;
+}
+
+tr.altTop td {
+	font-weight: bold;
+	border-bottom: 1px solid #aaaaaa;
+	font-family: Tahoma, Arial, Sans-Serif;
+}
+
+tr.altRow1 td {
+	background-color: #cccccc;
+	border-bottom: 1px solid #aaaaaa;
+}
+
+tr.altRow2 td {
+	background-color: #f0f0f0;
+	border-bottom: 1px solid #aaaaaa;
+	font-family: Tahoma, Arial, Sans-Serif;
+}
+
+td.altRight {
+	border-right: 1px solid #aaaaaa;
+	font-family: Tahoma, Arial, Sans-Serif;
+}
+
+td.altLeft {
+	border-left: 1px solid #aaaaaa;
+	font-family: Tahoma, Arial, Sans-Serif;
+}
+
+td.altSides {
+	border-left: 1px solid #aaaaaa;
+	border-right: 1px solid #aaaaaa;
+	border-right: 1px solid #aaaaaa;
+	font-family: Tahoma, Arial, Sans-Serif;
+}

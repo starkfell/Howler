@@ -1,0 +1,51 @@
+#!/usr/bin/perl
+#
+#  --- [icinga_check_service] Perl Script for Icinga ---
+#
+# Author:        Ryan Irujo
+# Inception:     01.16.2012
+# Last Modified: 05.17.2012
+#
+# Changes:       05.17.2012 - [R. Irujo]
+#                Added Performance Data to the Script to return a value of "1" if the Service
+#                is found in a running state and a "0" if it is not. The length of time that the Script
+#                takes to run has also been added to the Script and is outputted as Performance Data.
+#
+# Command Line:  ./icinga_check_service "crond"
+# NRPE Call:     ./check_nrpe -H testserver201.fabrikam.com -c icinga_check_service -a "crond"
+
+use Time::HiRes qw(gettimeofday tv_interval);
+chomp($hostname =`hostname`);
+$service_name   = $ARGV[0];
+
+
+# Service Check Start Time.
+$Query_Start  = [gettimeofday];
+
+# Service Check.
+chomp($check_service = `/sbin/service $service_name status 2>/dev/null`);
+
+# Service Check End Time and Overall Runtime Calculation.
+$Query_End = [gettimeofday];
+$Run_Time  = tv_interval $Query_Start, $Query_End;
+
+
+# Final Results and Performance Data are Calculated.
+if (!defined $service_name || $service_name eq ""){
+        print "An Argument Value for [service_name] has not been provided.\n";exit 3;
+        }
+elsif(!$check_service){
+    $Result = 0;
+    print "$service_name does not exist on $hostname, Login to the Host and investigate. |'Service_State'=$Result;;;0.0;10.0 'Check_Time'=$Run_Time\s;;;0.000000;60.000000;\n";exit 1;
+        }
+elsif($check_service =~ m/running/i) {
+    $Result = 1;
+    print "$service_name is running. |'Process_State'=$Result;;;0.0;10.0 'Check_Time'=$Run_Time\s;;;0.000000;60.000000;\n";exit 0;
+        }
+elsif($check_service =~ m/stopped/i){
+    $Result = 0;
+    print "$service_name is stopped, Login to $hostname and start the service | 'Process_State'=$Result;;;0.0;10.0 'Check_Time'=$Run_Time\s;;;0.000000;60.000000;\n";exit 2;
+        }
+
+
+

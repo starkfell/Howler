@@ -1,0 +1,27 @@
+#!/usr/bin/perl
+#
+#  --- [icinga_check_check_vol_rw] Perl Script for Icinga ---
+#
+# Author(s):     Ryan Irujo
+# Inception:     03.05.2012
+# Last Modified: 03.05.2012
+# Changes:
+#
+# Description:   Simple Boolean check of the 'check_read_only' Perl Script
+#                that verifies all standard mounts are able to be written to.
+#
+# Command Line:  ./icinga_check_vol_rw
+# NRPE Examples: ./check_nrpe -H srv101.fabrikam.com -c icinga_check_vol_rw
+
+chomp($HostName =`hostname`);
+chomp($RW_Check = `sudo /usr/local/bin/check_read_only`);
+
+$ReadWrite = $RW_Check=~/\bRead-Write\b/;
+
+if ($ReadWrite == 1){
+        print "$RW_Check on $HostName\n"; exit 0;
+        }
+if ($ReadWrite == ""){
+        print "$RW_Check on $HostName\n"; exit 2;
+        }
+

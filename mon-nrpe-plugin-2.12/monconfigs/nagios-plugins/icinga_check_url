@@ -1,0 +1,39 @@
+#!/usr/bin/perl
+#
+#  --- [icinga_check_url] Perl Script for Icinga ---
+#
+# Author(s):     Ryan Irujo
+# Inception:     01.23.2012
+# Last Modified:
+# Changes:
+#
+# Command Line:  ./icinga_check_url "http://server102.fabrikam.com"
+# NRPE Call:     ./check_nrpe -H testserver201.fabrikam.com -c icinga_check_url -a "server202.fabrikam.com"
+
+$URL = $ARGV[0];
+
+if (!defined $URL || $URL eq ""){
+        print "A 'URL' has not been provided.\n";exit 3;
+        }
+
+chomp($Size   = `curl $URL -s -w '\\nRetrieved %{size_download} bytes in %{time_total} seconds.' | tail -1`);
+chomp($Header = `curl --head $URL -s | grep 'HTTP*'`);
+chop($Header);  # --- To get rid of the double-space after the Header ---
+
+my @HeaderValue = $Header;
+my @BodyValue   = split(' ',$Size);
+
+if ($HeaderValue[0]=~/HTTP\/1\.\d+ (\d+)( .*)/) {
+        $ErrorCode    = $1;
+        $ErrorMessage = $2;
+	}
+
+if ($BodyValue[1] <= 0){
+	print "[$URL] - $Size Return Code: $Header - Page Returned is Blank or the URL is Invalid!\n"; exit 2;
+	}
+elsif ($ErrorCode == 200){
+       	print "[$URL] - $Size Return Code: $Header\n";exit 0;
+        }
+elsif ($ErrorCode != 200){
+	print "[$URL] - $Size Return Code: $Header - Verify the URL is available!\n";exit 2;
+	}

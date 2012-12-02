@@ -1,0 +1,235 @@
+#!/bin/sh
+#
+# chkconfig: 345 99 01
+# description: Icinga network monitor
+### BEGIN INIT INFO
+# Provides:          icinga
+# Required-Start:    $local_fs $remote_fs $syslog $named $network $time
+# Required-Stop:     $local_fs $remote_fs $syslog $named $network
+# Should-Start:
+# Should-Stop:
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: start and stop Icinga monitoring daemon
+# Description:       Icinga is a service monitoring system
+### END INIT INFO
+
+## definitions ##
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+IcingaBin=@bindir@/icinga
+IcingaCfgFile=@sysconfdir@/icinga.cfg
+IcingaCommandFile=@EXTCMDFILEDIR@/icinga.cmd
+IcingaRunFile=@lockfile@
+IcingaLockDir=/var/lock/subsys
+IcingaLockFile=icinga
+IcingaUser=@icinga_user@
+IcingaGroup=@icinga_grp@
+IcingaChkFile=@ICINGACHKFILE@
+
+# load extra environment variables
+if [ -f /etc/sysconfig/icinga ]; then
+        . /etc/sysconfig/icinga
+fi
+
+
+# Source function library
+# Solaris doesn't have an rc.d directory, so do a test first
+if [ -f /etc/rc.d/init.d/functions ]; then
+        . /etc/rc.d/init.d/functions
+elif [ -f /etc/init.d/functions ]; then
+        . /etc/init.d/functions
+fi
+
+# Check that icinga exists.
+if [ ! -f $IcingaBin ]; then
+    echo "Executable file $IcingaBin not found.  Exiting."
+    exit 1
+fi
+
+# Check that icinga.cfg exists.
+if [ ! -f $IcingaCfgFile ]; then
+    echo "Configuration file $IcingaCfgFile not found.  Exiting."
+    exit 1
+fi
+
+
+## helper functions ##
+
+status_icinga ()
+{
+
+	if ps -p $IcingaPID > /dev/null 2>&1; then
+	        return 0
+	else
+		return 1
+	fi
+
+	return 1
+}
+
+
+printstatus_icinga()
+{
+
+	if status_icinga $1 $2; then
+		echo "icinga (pid $IcingaPID) is running..."
+	else
+		echo "icinga is not running"
+	fi
+}
+
+
+killproc_icinga ()
+{
+	if kill -0  $IcingaPID  >/dev/null 2>&1; then
+		kill $2 $IcingaPID
+	fi
+}
+
+kill9proc_icinga()
+{
+	kill -9 $IcingaPID
+}
+
+pid_icinga ()
+{
+
+	if test ! -f $IcingaRunFile; then
+		echo "Icinga not running. No lock file found in $IcingaRunFile"
+		exit 1
+	fi
+
+	IcingaPID=`head -n 1 $IcingaRunFile`
+}
+
+
+chk_config ()
+{
+	printf "Running configuration check..."
+	$IcingaBin -v $IcingaCfgFile > $IcingaChkFile 2>&1
+	if test $? -ne 0; then
+		if test -z "$1"; then
+			cat $IcingaChkFile
+			echo "Result saved to $IcingaChkFile"
+		else
+			echo $1
+		fi
+		exit 1
+	fi
+	rm -f $IcingaChkFile
+	echo "OK"
+	#exit 0
+}
+
+start(){
+	# Check if icinga is already running
+	$0 status > /dev/null
+	if [ $? -eq 0 ]; then
+		pid_icinga
+		# check if pid can be found running
+		if status_icinga > /dev/null; then
+			echo "Icinga is already running. PID: $IcingaPID"
+				exit 1
+			else
+				echo "Icinga PID $IcingaPID not running. Removing lockfile."
+				rm -f $IcingaRunFile $IcingaLockDir/$IcingaLockFile
+		fi
+	fi
+
+	printf "Starting icinga: "
+	rm -f $IcingaCommandFile
+	touch $IcingaRunFile
+	chown $IcingaUser:$IcingaGroup $IcingaRunFile
+	$IcingaBin -d $IcingaCfgFile
+	if [ -d $IcingaLockDir ]; then touch $IcingaLockDir/$IcingaLockFile; fi
+	echo "Starting icinga done."
+	exit 0
+
+}
+
+
+## MAIN ##
+# See how we were called.
+case "$1" in
+
+	start)
+		chk_config "CONFIG ERROR!  Start aborted. See $IcingaChkFile for details."
+		start
+		;;
+
+	stop)
+		printf "Stopping icinga: "
+
+		pid_icinga
+		killproc_icinga icinga
+
+ 		# now we have to wait for icinga to exit and remove its
+ 		# own IcingaRunFile, otherwise a following "start" could
+ 		# happen, and then the exiting icinga will remove the
+ 		# new IcingaRunFile, allowing multiple icinga daemons
+ 		# to (sooner or later) run - John Sellens
+		#printf 'Waiting for icinga to exit .'
+ 		for i in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15; do
+ 		    if status_icinga > /dev/null; then
+ 			printf '.'
+ 			sleep 1
+ 		    else
+ 			break
+ 		    fi
+ 		done
+ 		if status_icinga > /dev/null; then
+ 		    echo ''
+ 		    echo 'Warning - icinga did not exit in a timely manner. Sending kill -9'
+		    kill9proc_icinga
+ 		else
+ 		    echo 'Stopping icinga done.'
+                    rm -f $IcingaRunFile $IcingaLockDir/$IcingaLockFile
+ 		fi
+
+		;;
+
+	status)
+		pid_icinga
+		printstatus_icinga icinga
+		;;
+
+	checkconfig)
+		chk_config " CONFIG ERROR!  See $IcingaChkFile for details."
+		;;
+
+	show-errors)
+		chk_config
+		;;
+
+	restart)
+		chk_config " CONFIG ERROR!  Restart aborted.  See $IcingaChkFile for details."
+		$0 stop
+		start
+		;;
+
+	reload|force-reload)
+		chk_config " CONFIG ERROR!  Reload aborted.  See $IcingaChkFile for details."
+		if test ! -f $IcingaRunFile; then
+			$0 start
+		else
+			pid_icinga
+			if status_icinga > /dev/null; then
+				printf "Reloading icinga configuration..."
+				killproc_icinga icinga -HUP
+				echo "done"
+			else
+				$0 stop
+				$0 start
+			fi
+		fi
+		;;
+
+	*)
+		echo "Usage: icinga {start|stop|restart|reload|force-reload|status|checkconfig|show-errors}"
+		exit 1
+		;;
+
+esac
+
+# End of this script

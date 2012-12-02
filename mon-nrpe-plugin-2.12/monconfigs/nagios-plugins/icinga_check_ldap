@@ -1,0 +1,64 @@
+#!/usr/bin/perl
+#
+#  --- [icinga_check_ldap] Perl Script for Icinga ---
+#
+# Author(s):     Ryan Irujo
+# Inception:     03.16.2012
+# Last Modified: 11.05.2012
+#
+# Changes:       03.19.2012 - [R. Irujo]
+#			      Added Performance Data Support.
+#
+#		 11.05.2012 - [R. Irujo]
+#			      Added in the '$Searchbase' and '$LDAP_OU' Variables to extend
+#			      the functionality of the Script.
+#		 			   
+#
+# Description:   Runs an ldapsearch against a given LDAP Server for a particular LDAP UID.
+#
+# Command Line:  ./icinga_check_ldap "[LDAP_Server]" "[LDAP_User_ID]" "[Searchbase]" "[LDAP_OU]"
+#
+# NRPE Examples: ./check_nrpe -H srv101.acorn.net -c icinga_check_ldap -a "ldap101.acorn.net" "hammy" "dc=acorn,dc=net" "ou=squirrels,dc=acorn,dc=net"
+
+use Time::HiRes qw(gettimeofday tv_interval);
+
+chomp($HostName =`hostname`);
+
+$LDAP_Server = $ARGV[0];
+$UID         = $ARGV[1];
+$Searchbase  = $ARGV[2];
+$LDAP_OU     = $ARGV[3];
+
+
+# Validating Parameters passed to the Script.
+if (!defined $LDAP_Server || $LDAP_Server eq ""){
+        print "An [LDAP_Server] to check against has not been provided.\n";exit 3;
+        }
+if (!defined $UID || $UID eq ""){
+        print "An {LDAP_User_ID] to query for not been provided.\n";exit 3;
+        }
+if (!defined $Searchbase || $Searchbase eq ""){
+        print "A [Searchbase] String to query against has not been provided. Ex. dc=domain,dc=net \n";exit 3;
+        }
+if (!defined $LDAP_OU || $LDAP_OU eq ""){
+        print "An [LDAP_OU] String to match results against has not provided. Ex. ou=Users,dc=domain,dc=net \n";exit 3;
+        }
+
+
+#LDAP Query Start Time and LDAP Query
+$Query_Start = [gettimeofday];
+chomp($LDAPCheck = `ldapsearch -b "$Searchbase" -H ldaps://$LDAP_Server -x "uid=$UID" "1.1" | grep -i 'dn: uid=$UID,$LDAP_OU'`);
+
+#LDAP Query Finish Time and Final Calculation
+$Query_End = [gettimeofday];
+$Run_Time  = tv_interval $Query_Start, $Query_End;
+
+#Results from LDAP Query are processed and returned.
+if ($LDAPCheck =~/^\d*$/){
+        print "LDAP Query against [$LDAP_Server] Failed! Login to $HostName and run an 'ldapsearch' query.|'LDAPQuery'=$Run_Time\s;;;0.000000;60.000000;\n"; exit 2;
+        }
+elsif ($LDAPCheck =~/$UID/ ){
+        print "LDAP Query against [$LDAP_Server] on $HostName was successful.|'LDAPQuery'=$Run_Time\s;;;0.000000;60.000000\n";exit 0;
+        }
+
+

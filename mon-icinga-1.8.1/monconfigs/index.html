@@ -1,0 +1,23 @@
+<html>
+<!-- This page redirects all traffic to the web root directory of the Apache Server to the Icinga Core GUI
+     located at http:\\localhost\icinga
+-->
+
+<head>
+<script type="text/javascript">
+<!--
+function delayer(){
+    window.location = "../icinga"
+}
+//-->
+</script>
+</head>
+<body onLoad="setTimeout('delayer()', 1000)">
+<center>
+<h2><font face="Calibri">Redirecting to...</font></h2>
+<img src="http://www.icinga.org/wp-content/uploads/2009/05/icinga_logo4.png" alt="Icinga Logo"/>
+<p></p>
+</center>
+
+</body>
+</html>

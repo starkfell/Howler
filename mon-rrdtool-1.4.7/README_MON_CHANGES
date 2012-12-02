@@ -1,0 +1,18 @@
+################################################################
+#                                                              #
+#        --- [mon-rrdtool] Change Log ---	               #
+#                                                              #
+################################################################
+
+05.02.2012 - [R. Irujo]
+           - v1.1
+           - Added a function in the 'rrdtool.spec' file  to add 'librrd' files in the '/usr/local/rrdtool/bin' directory
+             to the '/usr/lib64' directory after the base install because the RRDTool Binaries look in the '/usr/lib64'
+             directory by default.
+
+
+05.01.2012 - [R. Irujo]
+           - v1.0
+           - Initial RPM Build Created.
+
+

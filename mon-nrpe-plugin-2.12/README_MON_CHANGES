@@ -1,0 +1,233 @@
+######################################################################
+#                                                                    #
+# [mon-nrpe-plugin] - RPM CHANGE LOG                                 #
+#                                                                    #
+# Author:     R. Irujo                                               #
+# Inception:  02.05.2012                                             #
+#                                                                    #
+######################################################################
+
+11.25.2012 - [R. Irujo]
+	   - v3.4
+	   - Removed the following files from the 'nagios-plugins' directory:
+	     'icinga_check_process_count'
+
+	   - Renamed the following files in the 'nagios-plugins' directory:
+	     'icinga_check_disk_v2'          to 'icinga_check_disk'
+	     'icinga_check_load_v2'          to 'icinga_check_load'
+	     'icinga_check_process_count_v2' to 'icinga_check_process_count'
+	     'icinga_check_swap_percent_v2'  to 'icinga_check_swap_percent'
+	     'icinga_check_users_v2'         to 'icinga_check_users'
+
+	   - Removed the following command entries in the 'nrpe.cfg' file:
+	     'command[icinga_check_disk_v2]=/usr/lib64/nagios/plugins/icinga_check_disk_v2 $ARG1$ $ARG2$'
+	     'command[icinga_check_load_v2]=/usr/lib64/nagios/plugins/icinga_check_load_v2 $ARG1$ $ARG2$'
+	     'command[icinga_check_process_count]=/usr/lib64/nagios/plugins/icinga_check_process_count $ARG1$'
+	     'command[icinga_check_process_count_v2]=/usr/lib64/nagios/plugins/icinga_check_process_count_v2 $ARG1$'
+	     'command[icinga_check_swap_percent]=/usr/lib64/nagios/plugins/check_swap -w $ARG1$ -c $ARG2$'
+	     'command[icinga_check_swap_percent_v2]=/usr/lib64/nagios/plugins/icinga_check_swap_percent_v2 $ARG1$ $ARG2$'
+	     'command[icinga_check_users]=/usr/lib64/nagios/plugins/check_users -w $ARG1$ -c $ARG2$'
+	     'command[icinga_check_users_v2]=/usr/lib64/nagios/plugins/icinga_check_users_v2 $ARG1$ $ARG2$'
+
+	   - Added the following command entries in the 'nrpe.cfg' file:
+             'command[icinga_check_disk]=/usr/lib64/nagios/plugins/icinga_check_disk $ARG1$ $ARG2$'
+             'command[icinga_check_load]=/usr/lib64/nagios/plugins/icinga_check_load $ARG1$ $ARG2$'
+             'command[icinga_check_process_count]=/usr/lib64/nagios/plugins/icinga_check_process_count $ARG1$'
+             'command[icinga_check_swap_percent]=/usr/lib64/nagios/plugins/icinga_check_swap_percent $ARG1$ $ARG2$'
+             'command[icinga_check_users]=/usr/lib64/nagios/plugins/icinga_check_users $ARG1$ $ARG2$'	
+
+
+11.13.2012 - [R. Irujo]
+	   - v3.3
+	   - Added the following compiled plugins to the 'nagios-plugins' directory:
+	     'check_hpjd'
+             'check_snmp'
+
+
+11.02.2012 - [R. Irujo]
+	   - v3.2
+	   - The 'icinga_check_ldap' script has been updated and now supports four parameters instead of two.
+
+
+07.11.2012 - [R. Irujo]
+           - v3.1
+	   - Added echo statements to the 'nrpe.spec' file stating when the RPM Package was installed or removed.
+
+
+07.10.2012 - [R. Irujo]
+	   - v3.0
+           - Added the 'icinga_check_mem_used' script to the 'nagios-plugins' directory.
+           - 'nrpe.cfg' file changes
+             Added the 'icing_check_mem_used' definition for the 'icinga_check_mem_used' script.
+
+
+06.11.2012 - [R. Irujo]
+           - v2.9
+           - 'utils.c' file changes
+             Changed the 'Open a Connection' section error return value(s) from 'STATE_CRITICAL' to 'STATE_UNKNOWN'
+             to cut down on false positive error messages from the 'NRPE Agents' when events such as 'connection timeouts' 
+             or 'connection refused by host' occurs.
+           - 'check_nrpe.c' file changes
+	     Documented the change made in 'utils.c' in the notes section and recomplied the 'check_nrpe plugin'. 
+             The customized 'check_nrpe plugin' version is now '1.1'.
+
+
+05.30.2012 - [R. Irujo]
+	   - v2.8
+ 	   - Added the 'icinga_check_load_v2' to the 'nagios-plugins' directory.
+	   - Added the 'icinga_check_process_count_v2' to the 'nagios-plugins' directory.
+	   - Added the 'icinga_check_users_v2' to the 'nagios-plugins' directory.
+	   - 'nrpe.cfg' file changes
+	     Added the 'icinga_check_load_v2' definition for the 'icinga_check_load_v2' script.
+	     Added the 'icinga_check_process_count_v2' definition for the 'icinga_check_process_count_v2' script.
+	     Added the 'icinga_check_users_v2' definition for the 'icinga_check_users_v2' script.
+
+
+05.25.2012 - [R. Irujo]
+	   - v2.7
+           - Reverted the following command changes made to the 'nrpe.cfg' file in v2.6:
+             FROM: 'command[icinga_check_swap_percent]=/usr/lib64/nagios/plugins/icinga_check_swap_percent $ARG1$ $ARG2$'
+	     TO:   'command[icinga_check_swap_percent]=/usr/lib64/nagios/plugins/check_swap -w $ARG1$ -c $ARG2$'
+	     The change was reverted after an issue of compatility came up in regards to Graphs showing up 
+             correctly within PNP4Nagios. Because of this, new 'command definitions' have been created so the change over
+             to the new Plugins that include additional 'performance data' in regards to Plugin performance can be done
+             gradually.
+           - Added the 'icinga_check_disk_v2' script to the 'nagios-plugins' directory.
+           - Added the 'icinga_check_swap_percent_v2' script in the 'nagios-plugins' directory.
+           - 'nrpe.cfg' file changes
+             Added the 'icing_check_disk_v2' definition for the 'icinga_check_disk_v2' script.
+             Added the 'icinga_check_swap_percent_v2' definitions for the 'icinga_check_swap_percent_v2' script.
+
+
+05.21.2012 - [R. Irujo]
+           - v2.6
+	   - 'nrpe.cfg' file changes
+	     Modified the following entry in the 'nrpe.cfg' file:
+             FROM: 'command[icinga_check_swap_percent]=/usr/lib64/nagios/plugins/check_swap -w $ARG1$ -c $ARG2$'
+	     TO:   'command[icinga_check_swap_percent]=/usr/lib64/nagios/plugins/icinga_check_swap_percent $ARG1$ $ARG2$'
+	   - Added the 'icinga_check_swap_percent' script to the 'nagios-plugins' directory.
+	   - The following 'Icinga Plugins' have been updated to include additional 'performance data' pertaining to the 
+             length of time the Plugins take to run on the Remote Hosts they reside on:
+	     'icinga_check_port'
+	     'icinga_check_ps_service'
+	     'icinga_check_service'
+	     'icinga_check_swap_percent'
+
+
+05.10.2012 - [R. Irujo]
+           - v2.5
+           - The 'check_nrpe' plugin has been modified return back an 'UNKNOWN State' value instead of 
+             a 'CRITICAL State' value in 'Icinga' if there is an issue communicating with the 'Nrpe Agents'
+             on 'Remote Hosts'. The compiling of the 'check_nrpe' plugin was done manually to ensure that the 
+             change took as there were issues getting the compiling of the plugin via the RPM build process.
+	   - 'nrpe.spec' file changes
+	     Added the custom 'check_nrpe' plugin to the '%install' section.
+
+
+03.29.2012 - [R. Irujo]
+           - v2.4
+           - Added the 'icinga_check_ip_rules' script to the 'nagios-plugins' directory.
+           - 'nrpe.cfg' file changes
+             Added the 'icing_check_ip_rules' definition for the 'icinga_check_ip_rules' script.
+
+
+3.21.2012 - [R. Irujo]
+           - v2.3
+           - Added the 'icinga_check_powerpath' script to the 'nagios-plugins' directory.
+           - Updated the 'icinga_check_sys_uptime' script in the 'nagios-plugins' directory.
+           - 'nrpe.cfg' file changes
+             Added the 'icing_check_powerpath' definition for the 'icinga_check_powerpath' script.
+
+
+03.19.2012 - [R. Irujo]
+           - v2.2
+           - Added Performance Data Support to the 'icinga_check_ldap' script.
+           - Added Performance Data Support to the 'icinga_check_ldap_sync' script.
+
+
+03.18.2012 - [R. Irujo]
+           - v2.1
+           - Added the 'icinga_check_ldap' script to the 'nagios-plugins' directory.
+           - Added the 'ldap-sync-check' script to the 'nagios-plugins' directory.
+           - 'nrpe.cfg' file changes:
+             Added the 'icinga_check_ldap' definition for the 'icinga_check_ldap' script.
+             Added the 'icinga_check_ldap_sync' definition for the 'ldap-sync-check' script.
+
+
+03.15.2012 - [R. Irujo]
+           - v2.0
+           - Added the 'check_bonding.pl' script to the 'nagios-plugins' directory.
+           - 'nrpe.cfg' file changes:
+             Added the 'icinga_check_bonding' definition for the 'check_bonding.pl' script.
+             Added the 'icinga_check_dns' definition for the standard Nagios Plugin 'check_dns'.
+
+
+03.14.2012 - [R. Irujo]
+           - v1.9
+           - Added the 'icinga_check_file_count' script to the 'nagios-plugins' directory.
+           - Added the 'icinga_check_file_size' script to the 'nagios-plugins' directory.
+           - 'nrpe.cfg' file changes:
+             Added the 'icinga_check_file_count' definition for the 'icinga_check_file_count' script.
+             Added the 'icinga_check_file_size' definition for the 'icinga_check_file_size' script.
+
+
+03.13.2012 - [R. Irujo]
+           - v1.8
+           - Added the 'icinga_check_adaptive-auth-time' script to the 'nagios-plugins' directory.
+           - 'nrpe.cfg' file changes:
+             Added the 'icinga_check_adaptive-auth-time' definition for the 'icinga_check_adaptive-auth-time' script.
+
+
+03.12.2012 - [R. Irujo]
+           - v1.7
+           - Added the 'check_squid.pl' script to the 'nagios-plugins' directory.
+           - 'nrpe.cfg' file changes:
+             Added the 'icinga_check_squid_stats' definition for the 'check_squid.pl' script.
+
+
+03.09.2012 - [R. Irujo]
+           - v1.6
+           - Added the 'check_clamav' script into the 'nagios-plugins' directory.
+           - Modified the 'check_clamav' script to use '/usr/lib64/nagios/plugins' as the Nagios Plugins Home Directory.
+           - 'nrpe.cfg' file changes:
+             Added in the 'icinga_check_clamav' definition that utilizes the 'check_clamav' script.
+
+
+03.08.2012 - [R. Irujo]
+           - v1.5
+           - 'nrpe.cfg' file changes:
+             Added in a definition for the 'icinga_check_ntp_time' that utilizes a standard Nagios-Plugin
+             instead of the 'icinga_check_ntp' script. This new definition will replace the 'icinga_check_ntp' plugin.
+
+
+03.05.2012 - [R. Irujo]
+           - v1.4
+           - Added the 'icinga_check_vol_rw' script into 'nagios-plugins'.
+           - 'nrpe.cfg' file changes:
+             Added in a definition for the 'icinga_check_vol_rw' script.
+
+
+02.28.2012 - [R. Irujo]
+           - v1.3
+           - 'nrpe.cfg' file changes:
+             cleaned up the hosts listed in the 'allowed_hosts' field that were no longer in use.
+
+
+02.24.2012 - [R. Irujo]
+           - v1.2
+           - Modified the 'icinga_check_port script'.
+           - Modified the 'icinga_check_ntp script'.
+
+
+02.12.2012 - [R. Irujo]
+           - v1.1
+           - Modified the 'PROGRAM_VERSION' value in the 'common.h' file located in the '/includes' directory
+             to display that "illegal metachars allowed" and the Build Date.
+
+
+02.05.2012 - [R. Irujo]
+           - v1.0
+           - Illegal Metachars have been enabled on the NRPE daemon. This was made possible
+             by commenting out the 'illegal_metachars' variables and functions in the file
+             'nrpe.c' under the '/src' directory.
+

@@ -1,0 +1,17 @@
+
+TABLE.infoOp
+{
+padding: 0px;
+margin-top: 16px;
+margin-left: 2px;
+margin-right: 2px;
+text-align: left;
+background-color: #F0F1F5;
+border-top: 1px #E2DECD outset;
+border-left: 1px #E2DECD outset;
+border-right: 1px #E2DECD outset;
+border-bottom: 1px #E2DECD outset;
+background-image: url(../images/border_big.gif);
+background-repeat: repeat-x;
+width: 300px;
+}

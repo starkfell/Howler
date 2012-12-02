@@ -1,0 +1,68 @@
+#!/usr/bin/perl
+#
+#  --- [icinga_check_ip_rules] Perl Script for Icinga ---
+#
+# Author(s):     Ryan Irujo
+# Inception:     03.29.2012
+# Last Modified: 03.29.2012
+#
+# Changes:       
+#
+# Description:   Checks to see if specific IP Rule entries are in the IP Rules or not. If one or more of the IP Rules 
+#                are missing, the monitor changes to a Critical State. IP Rules to check are based on their entry
+#                number in the Routing Policy Database on the Host being checked and are provided by the UNIX Team.
+#
+# Command Line:  ./icinga_check_ip_rules "[Rule_1]" "[Rule_2]"
+# NRPE Examples: ./check_nrpe -H srv101.fabrikam.com -c icinga_check_ip_rules -a "32764" "32765"
+
+chomp($HostName =`hostname`);
+
+$Rule_1 = $ARGV[0];
+$Rule_2 = $ARGV[1];
+
+# Validating Parameters passed to the Script.
+if (!defined $Rule_1 || $Rule_1 eq ""){
+        print "An Argument Value for [Rule_1] has not been provided.\n";exit 3;
+        }
+
+if (!defined $Rule_2 || $Rule_2 eq ""){
+        print "An Argument Value for [Rule_2] has not been provided.\n";exit 3;
+        }
+
+# Retrieving the IP Rules that based on the Parameters passed to the Script.
+chomp($IPRule_1 = `/sbin/ip rule show | grep $Rule_1`);
+chomp($IPRule_2 = `/sbin/ip rule show | grep $Rule_2`);
+
+# Basic Performance Metrics to show length of time Rules have been missing or available.
+if ($IPRule_1 eq "") {
+	$IPRule_Count_1 = 0;
+	}
+else {$IPRule_Count_1 = 1};
+
+if ($IPRule_2 eq "") {
+        $IPRule_Count_2 = 0;
+        }
+else {$IPRule_Count_2 = 1};
+
+$Total_Count = ($IPRule_Count_1 + $IPRule_Count_2);
+
+# Processing IP Rule Checks
+if ($IPRule_Count_1 == 0 && $IPRule_Count_2 == 0){
+        print "All IP Rules are missing! Login to $HostName and Investigate.\nRule_1 = [$IPRule_1]\nRule_2 = [$IPRule_2]|'IPRules'=$Total_Count;0;0;0;10;\n";exit 2;
+	}
+
+if ($IPRule_Count_1 == 1 && $IPRule_Count_2 == 0){
+        print "1st IP Rule is missing! Login to $HostName and Investigate.\nRule_1 = [$IPRule_1]\nRule_2 = [$IPRule_2]|'IPRules'=$Total_Count;0;0;0;10;\n";exit 2;
+	}
+
+if ($IPRule_Count_1 == 0 && $IPRule_Count_2 == 1){
+        print "2nd IP Rule is missing! Login to $HostName and Investigate.\nRule_1 = [$IPRule_1]\nRule_2 = [$IPRule_2]|'IPRules'=$Total_Count;0;0;0;10;\n";exit 2;
+	}
+
+if ($IPRule_Count_1 == 1 && $IPRule_Count_2 == 1){
+        print "All IP Rules are available.\nRule_1 = [$IPRule_1]\nRule_2 = [$IPRule_2]|'IPRules'=$Total_Count;0;0;0;10;\n";exit 0;
+        }
+
+
+
+

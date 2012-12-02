@@ -1,0 +1,54 @@
+###############################
+# Makefile for IDOUtils 
+###############################
+
+
+# Source code directories
+SRC_BASE=./src/
+SRC_INCLUDE=./include/
+SRC_CONFIG=./config/
+
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+LOGDIR=@LOGDIR@
+CFGDIR=@sysconfdir@
+BINDIR=@bindir@
+LIBDIR=@libdir@
+LIBEXECDIR=@libexecdir@
+CGIDIR=@sbindir@
+INSTALL=@INSTALL@
+INSTALL_OPTS=@INSTALL_OPTS@
+USE_IDOUTILS=@USE_IDOUTILS@
+
+all:
+	if [ x$(USE_IDOUTILS) = xyes ]; then \
+	    cd $(SRC_BASE) && $(MAKE); \
+	fi;
+
+clean:
+	cd $(SRC_BASE) && $(MAKE) $@
+	rm -f core
+	rm -f *~ */*~
+
+distclean: clean
+	cd $(SRC_BASE) && $(MAKE) $@
+	rm -f config.log config.status config.cache $(SRC_INCLUDE)/config.h
+	rm -f Makefile
+	rm -f init-script.suse subst
+	rm -f db/scripts/prepsql db/scripts/installdb db/scripts/upgradedb
+	rm -f config/ido2db.cfg-sample config/idomod.cfg-sample config/idoutils.cfg-sample
+
+devclean: distclean
+
+install-idoutils: install
+
+install: 
+	cd $(SRC_BASE) && $(MAKE) $@
+	$(INSTALL) -m 775 $(INSTALL_OPTS) -d $(DESTDIR)$(CFGDIR)
+	$(INSTALL) -m 775 $(INSTALL_OPTS) -d $(DESTDIR)$(CFGDIR)/objects
+	$(INSTALL) -m 775 $(INSTALL_OPTS) -d $(DESTDIR)$(CFGDIR)/modules
+	$(INSTALL) -b -m 664 $(INSTALL_OPTS) config/ido2db.cfg-sample $(DESTDIR)$(CFGDIR)
+	$(INSTALL) -b -m 664 $(INSTALL_OPTS) config/idomod.cfg-sample $(DESTDIR)$(CFGDIR)
+	$(INSTALL) -b -m 664 $(INSTALL_OPTS) config/idoutils.cfg-sample $(DESTDIR)$(CFGDIR)/modules
+	$(INSTALL) -b -m 664 $(INSTALL_OPTS) config/ido2db_check_proc.cfg $(DESTDIR)$(CFGDIR)/objects/ido2db_check_proc.cfg
+

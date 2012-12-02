@@ -1,0 +1,595 @@
+####################################################################
+# Makefile for Icinga
+####################################################################
+
+
+###############################
+# Source code directories
+###############################
+SRC_BASE=@srcdir@/base
+SRC_CGI=@srcdir@/cgi
+SRC_HTM=@srcdir@/html
+SRC_DOCS=@srcdir@/html/docs
+SRC_MODULE=@srcdir@/module
+SRC_INCLUDE=@srcdir@/include
+SRC_COMMON=@srcdir@/common
+SRC_XDATA=@srcdir@/xdata
+SRC_CONTRIB=@srcdir@/contrib
+SRC_IDOUTILS=@srcdir@/module/idoutils
+SRC_TTAP=@srcdir@/t-tap
+SRC_TAP=@srcdir@/tools/libtap
+SRC_T=@srcdir@/t
+SRC_DOCBOOK=@srcdir@/docbook
+SRC_DOCBOOK_DE=@srcdir@/docbook/de
+SRC_DOCBOOK_EN=@srcdir@/docbook/en
+
+###############################
+# Compiler Settings
+###############################
+CC=@CC@
+CFLAGS=@CFLAGS@ @DEFS@
+LDFLAGS=@LDFLAGS@ @LIBS@
+
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+LOGDIR=@LOGDIR@
+CGILOGDIR=@CGILOGDIR@
+CHECKRESULTDIR=@CHECKRESULTDIR@
+EXTCMDFILEDIR=@EXTCMDFILEDIR@
+EVENTHANDLERDIR=@EVENTHANDLERDIR@
+P1FILELOC=@P1FILELOC@
+CFGDIR=@sysconfdir@
+BINDIR=@bindir@
+LIBDIR=@libdir@
+CGIDIR=@sbindir@
+LIBEXECDIR=@libexecdir@
+HTMLDIR=@datarootdir@
+INSTALL=@INSTALL@
+INSTALL_OPTS=@INSTALL_OPTS@
+INSTALL_OPTS_WEB=@INSTALL_OPTS_WEB@
+COMMAND_OPTS=@COMMAND_OPTS@
+HTTPD_CONF=@HTTPD_CONF@
+INIT_DIR=@init_dir@
+INIT_OPTS=@INIT_OPTS@
+CGICFGDIR=$(CGIDIR)
+PERLDIR=@PERLDIR@
+
+###############################
+# Modules
+###############################
+USE_EVENTBROKER=@USE_EVENTBROKER@
+USE_IDOUTILS=@USE_IDOUTILS@
+USE_ICINGAAPI=@USE_ICINGAAPI@
+
+INSTALLPERLSTUFF=@INSTALLPERLSTUFF@
+
+CGIEXTRAS=@CGIEXTRAS@
+
+###############################
+# snprintf (Solaris)
+###############################
+SNPRINTF_O=@SNPRINTF_O@
+
+###############################
+# Tools
+###############################
+MKDIR=/bin/mkdir
+
+###############################
+# Global
+###############################
+ICINGA_VERSION=1.8.1
+
+CP=@CP@
+
+@SET_MAKE@
+
+none:
+	@printf "Please supply a command line argument (i.e. 'make all').\n\n"
+	@printf "Generic targets: all, fullinstall, clean\n\n"
+	@printf "Other useful targets:\n"
+	@printf "\t%-23s - %s\n" "distclean" "make source ready for commit or packaging"
+	@printf "\t%-23s - %s\n" "create-tarball" "create tarball for packaging"
+	@printf "\t%-23s - %s\n" "create-tarball-nightly" "create nightly build tarball"
+	@printf "\t%-23s - %s\n" "create-docs" "generate html docs from docbook"
+	@printf "\t%-23s - %s\n" "submodule-init" "init git submodules"
+	@printf "\t%-23s - %s\n" "submodule-update" "update git submodules"
+	@printf "\t%-23s - %s\n" "submodule-update-latest" "update git submodules, pull latest master"
+
+	@printf "\nCompile targets:\n"
+	@printf "\t%-23s - %s\n" "icinga" "icinga core"
+	@printf "\t%-23s - %s\n" "cgis" "classical web"
+	@printf "\t%-23s - %s\n" "contrib" "contrib dir"
+	@printf "\t%-23s - %s\n" "modules" "icinga modules"
+	@printf "\t%-23s - %s\n" "idoutils" "icinga idoutils"
+
+	@printf "\nInstall targets:\n"
+	@printf "\t%-23s - %s\n" "install" "install core, cgis, html"
+	@printf "\t%-23s - %s\n" "install-base" "install core"
+	@printf "\t%-23s - %s\n" "install-cgis" "install classical web"
+	@printf "\t%-23s - %s\n" "install-html" "install html files"
+	@printf "\t%-23s - %s\n" "install-config" "install sample config"
+	@printf "\t%-23s - %s\n" "install-webconf" "install apache config for classical web"
+	@printf "\t%-23s - %s\n" "install-init" "install init script"
+	@printf "\t%-23s - %s\n" "install-commandmode" "install external command file"
+	@printf "\t%-23s - %s\n" "install-idoutils" "install idoutils module"
+	@printf "\t%-23s - %s\n" "install-eventhandlers" "install sample eventhandlers"
+	@printf "\t%-23s - %s\n" "install-dev-docu" "install doxygen development documentation"
+	@printf "\t%-23s - %s\n" "install-testconfig" "install test config"
+
+
+# FreeBSD make does not support -C option, so we'll use the Apache style... (patch by Stanley Hopcroft 12/27/1999)
+
+###############################
+# Compile
+###############################
+
+all:
+	cd $(SRC_BASE) && $(MAKE)
+	cd $(SRC_CGI) && $(MAKE)
+	cd $(SRC_HTM) && $(MAKE)
+
+	if [ x$(USE_EVENTBROKER) = xyes ]; then \
+		cd $(SRC_MODULE) && $(MAKE); \
+	fi
+
+	@if [ x$(USE_IDOUTILS) = xyes ]; then \
+		cd $(SRC_IDOUTILS) && $(MAKE); \
+	fi
+
+	@echo ""
+	@echo "*** Compile finished ***"
+	@echo ""
+	@echo "If the main program and CGIs compiled without any errors, you"
+	@echo "can continue with installing Icinga as follows (type 'make'"
+	@echo "without any arguments for a list of all possible options):"
+	@echo ""
+	@echo "  make install"
+	@echo "     - This installs the main program (Icinga Core), CGIs"
+	@echo "       (Classical Web), and HTML files"
+	@echo ""
+	@echo "  make install-init"
+	@echo "     - This installs the init script in $(DESTDIR)$(INIT_DIR)"
+	@echo ""
+	@echo "  make install-commandmode"
+	@echo "     - This installs and configures permissions on the"
+	@echo "       directory for holding the external command file"
+	@echo ""
+	@echo "  make install-idoutils"
+	@echo "     - This installs the database addon IDOUtils into the"
+	@echo "       destination directory"
+	@echo ""
+	@echo "  make install-config"
+	@echo "     - This installs *SAMPLE* config files in $(DESTDIR)$(CFGDIR)"
+	@echo "       You'll have to modify these sample files before you can"
+	@echo "       use Icinga.  Read the HTML documentation for more info"
+	@echo "       on doing this.  Pay particular attention to the docs on"
+	@echo "       object configuration files, as they determine what/how"
+	@echo "       things get monitored!"
+	@echo ""
+	@echo "  make install-webconf"
+	@echo "     - This installs the Apache config file for the classical"
+	@echo "       Icinga web interface"
+	@echo ""
+	@echo ""
+	@echo "*** Support Notes *******************************************"
+	@echo ""
+	@echo "If you have questions about configuring or running Icinga,"
+	@echo "please make sure that you:"
+	@echo ""
+	@echo "     - Look at the sample config files"
+	@echo "     - Read the HTML documentation in html/docs/"
+	@echo ""
+	@echo "before you post a question to one of the mailing lists at"
+	@echo "http://www.icinga.org/community/ or at Icinga Portal:"
+	@echo "http://www.icinga-portal.org"
+	@echo ""
+	@echo "Also make sure to include pertinent information that could"
+	@echo "help others help you.  This might include:"
+	@echo ""
+	@echo "     - What version of Icinga you are using"
+	@echo "     - What version of the plugins you are using"
+	@echo "     - Relevant snippets from your config files"
+	@echo "     - Relevant error messages from the Icinga log file"
+	@echo ""
+	@echo "For more information on obtaining support for Icinga, visit:"
+	@echo ""
+	@echo "       http://www.icinga.org/community/"
+	@echo ""
+	@echo "*************************************************************"
+	@echo ""
+	@echo "Enjoy."
+	@echo ""
+
+icinga:
+	cd $(SRC_BASE) && $(MAKE)
+
+config:
+	@echo "Sample config files are automatically generated once you run the"
+	@echo "configure script.  You can install the sample config files on your"
+	@echo "system by using the 'make install-config' command."
+
+cgis:
+	cd $(SRC_CGI) && $(MAKE)
+
+idoutils:
+	@if [ x$(USE_IDOUTILS) = xyes ]; then \
+		cd $(SRC_IDOUTILS) && $(MAKE); \
+        else \
+                echo "" ;\
+                echo "Sorry, IDOUtils not enabled!" ;\
+                echo "Try again with ./configure --enable-idoutils" ;\
+                echo "" ;\
+        fi
+
+html:
+	cd $(SRC_HTM) && $(MAKE)
+
+contrib:
+	cd $(SRC_CONTRIB) && $(MAKE)
+
+modules:
+	cd $(SRC_MODULE) && $(MAKE)
+
+###############################
+# Clean
+###############################
+
+clean:
+	cd $(SRC_BASE) && $(MAKE) $@
+	cd $(SRC_CGI) && $(MAKE) $@
+	cd $(SRC_COMMON) && $(MAKE) $@
+	cd $(SRC_XDATA) && $(MAKE) $@
+	cd $(SRC_HTM) && $(MAKE) $@
+	cd $(SRC_INCLUDE) && $(MAKE) $@
+	cd $(SRC_CONTRIB) && $(MAKE) $@
+	cd $(SRC_MODULE) && $(MAKE) $@
+	cd $(SRC_IDOUTILS) && $(MAKE) $@
+	cd $(SRC_TTAP) && $(MAKE) $@
+	cd $(SRC_T) && $(MAKE) $@
+	cd $(SRC_TAP) && $(MAKE) $@; \
+
+	rm -f *.cfg core
+	rm -f *~ *.*~ */*~ */*.*~ */*/*.*~
+
+distclean: clean
+	cd $(SRC_BASE) && $(MAKE) $@
+	cd $(SRC_CGI) && $(MAKE) $@
+	cd $(SRC_COMMON) && $(MAKE) $@
+	cd $(SRC_XDATA) && $(MAKE) $@
+	cd $(SRC_HTM) && $(MAKE) $@
+	cd $(SRC_INCLUDE) && $(MAKE) $@
+	cd $(SRC_CONTRIB) && $(MAKE) $@
+	cd $(SRC_MODULE) && $(MAKE) $@
+	cd $(SRC_IDOUTILS) && $(MAKE) $@
+	cd $(SRC_TTAP) && $(MAKE) $@
+	cd $(SRC_T) && $(MAKE) $@
+	cd $(SRC_TAP) && $(MAKE) $@; \
+
+	rm -f sample-config/*.cfg sample-config/*.conf sample-config/template-object/*.cfg
+	rm -f daemon-init pkginfo rc.ido2db daemon-init-redhat
+	rm -f include/dh.h
+	rm -f Makefile subst p1.pl
+	rm -f config.log config.status config.cache
+	rm -f t/var/objects.precache.generated t/var/objects.precache
+	rm -f solaris/icinga.xml
+
+devclean: distclean
+
+###############################
+# Test
+###############################
+
+test:
+	$(MAKE) test-perl
+	$(MAKE) test-tap
+
+test-tap: tools/libtap/tap.o icinga cgis
+	cd $(SRC_TTAP) && $(MAKE) test;
+
+tools/libtap/tap.o:
+	cd tools/libtap && $(MAKE)
+
+test-perl: icinga cgis
+	cd t && $(MAKE) test
+
+###############################
+# Package
+###############################
+
+copy-docs-style:
+	cp ${SRC_DOCBOOK}/stylesheets/icinga-docs.css ${SRC_DOCS}/stylesheets/icinga-docs.css
+	cp ${SRC_DOCBOOK}/js/icinga-docs.js ${SRC_DOCS}/js/icinga-docs.js
+
+create-docs: copy-docs-style
+	#${MAKE} submodule-init
+	#${MAKE} submodule-update
+	#${MAKE} submodule-update-latest
+	cd ${SRC_DOCBOOK_EN} && make en
+	cd ${SRC_DOCBOOK_DE} && make de
+	@echo "updated docs :)"
+
+create-tarball:
+	./make-tarball --prefix icinga-${ICINGA_VERSION}/
+
+create-tarball-nightly:
+	#git pull origin `git branch --no-color 2> /dev/null | sed -e '/^[^*]/d' -e 's/* \(.*\)/\1/'` #user must pull himself, some brnaches are not remote
+	${MAKE} submodule-update-latest
+	${MAKE} create-docs
+	./make-tarball --prefix icinga-${ICINGA_VERSION}_`date +%Y%m%d`_`git rev-parse --short HEAD`/
+
+create-doxygen:
+	doxygen
+
+###############################
+# GIT
+###############################
+
+submodule-init:
+	git submodule init docbook
+
+submodule-update:
+	git submodule update
+
+submodule-update-latest:
+	cd ${SRC_DOCBOOK} && git checkout master && git pull origin master
+	@echo "pulled latest docbook :)"
+
+
+###############################
+# Install
+###############################
+
+
+install-html:
+	cd $(SRC_HTM) && $(MAKE) install
+
+install-dev-docu:
+	cd $(SRC_HTM) && $(MAKE) install-dev-docu
+
+install-base:
+	cd $(SRC_BASE) && $(MAKE) install
+
+install-cgis:
+	cd $(SRC_CGI) && $(MAKE) install
+
+install:
+	cd $(SRC_BASE) && $(MAKE) $@
+	cd $(SRC_CGI) && $(MAKE) $@
+	cd $(SRC_HTM) && $(MAKE) $@
+
+	$(MAKE) install-basic
+
+install-unstripped:
+	cd $(SRC_BASE) && $(MAKE) $@
+	cd $(SRC_CGI) && $(MAKE) $@
+	cd $(SRC_HTM) && $(MAKE) $@
+
+	$(MAKE) install-basic
+
+install-basic:
+	$(INSTALL) -m 775 $(INSTALL_OPTS) -d $(DESTDIR)$(LIBEXECDIR)
+	$(INSTALL) -m 775 $(INSTALL_OPTS) -d $(DESTDIR)$(LOGDIR)
+	$(INSTALL) -m 775 $(INSTALL_OPTS) -d $(DESTDIR)$(LOGDIR)/archives
+	$(INSTALL) -m 775 $(INSTALL_OPTS) -d $(DESTDIR)$(CHECKRESULTDIR)
+	if [ $(INSTALLPERLSTUFF) = yes ]; then \
+		$(INSTALL) -m 775 $(INSTALL_OPTS) -d $(DESTDIR)$(P1FILELOC); \
+		$(INSTALL) -m 664 $(INSTALL_OPTS) p1.pl $(DESTDIR)$(P1FILELOC); \
+	fi;
+
+	@echo ""
+	@echo "*** Main program, CGIs and HTML files installed ***"
+	@echo ""
+	@echo "You can continue with installing Icinga as follows (type 'make'"
+	@echo "without any arguments for a list of all possible options):"
+	@echo ""
+	@echo "  make install-init"
+	@echo "     - This installs the init script in $(DESTDIR)$(INIT_DIR)"
+	@echo ""
+	@echo "  make install-commandmode"
+	@echo "     - This installs and configures permissions on the"
+	@echo "       directory for holding the external command file"
+	@echo ""
+	@echo "  make install-eventhandlers"
+	@echo "     - This installs the sample eventhandlers in $(DESTDIR)$(EVENTHANDLERDIR)"
+	@echo ""
+	@echo "  make install-idoutils"
+	@echo "     - This installs the database addon IDOUtils into the"
+	@echo "       destination directory"
+	@echo ""
+	@echo "  make install-config"
+	@echo "     - This installs sample config files in $(DESTDIR)$(CFGDIR)"
+	@echo ""
+	@echo "  make install-webconf"
+	@echo "     - This installs the Apache config file for the web interface"
+	@echo ""
+	@echo ""
+	@echo "*** Make sure to check Changelog for introduced changes! ***"
+	@echo "*** In case of an upgrade, don't forget to read the upgrade guides! ***"
+	@echo "    http://docs.icinga.org/latest/en/upgrading.html"
+	@echo ""
+
+
+install-config:
+	$(INSTALL) -m 775 $(INSTALL_OPTS) -d $(DESTDIR)$(CFGDIR)
+	$(INSTALL) -m 775 $(INSTALL_OPTS) -d $(DESTDIR)$(CFGDIR)/objects
+	$(INSTALL) -m 775 $(INSTALL_OPTS) -d $(DESTDIR)$(CFGDIR)/conf.d
+	$(INSTALL) -m 775 $(INSTALL_OPTS) -d $(DESTDIR)$(CFGDIR)/modules
+	$(INSTALL) -b -m 664 $(INSTALL_OPTS) sample-config/icinga.cfg $(DESTDIR)$(CFGDIR)/icinga.cfg
+	$(INSTALL) -b -m 660 $(INSTALL_OPTS) sample-config/resource.cfg $(DESTDIR)$(CFGDIR)/resource.cfg
+	$(INSTALL) -b -m 664 $(INSTALL_OPTS) sample-config/cgi.cfg $(DESTDIR)$(CFGDIR)/cgi.cfg
+	$(INSTALL) -b -m 664 $(INSTALL_OPTS) sample-config/cgiauth.cfg $(DESTDIR)$(CFGDIR)/cgiauth.cfg
+	$(INSTALL) -b -m 664 $(INSTALL_OPTS) sample-config/template-object/templates.cfg $(DESTDIR)$(CFGDIR)/objects/templates.cfg
+	$(INSTALL) -b -m 664 $(INSTALL_OPTS) sample-config/template-object/commands.cfg $(DESTDIR)$(CFGDIR)/objects/commands.cfg
+	$(INSTALL) -b -m 664 $(INSTALL_OPTS) sample-config/template-object/contacts.cfg $(DESTDIR)$(CFGDIR)/objects/contacts.cfg
+	$(INSTALL) -b -m 664 $(INSTALL_OPTS) sample-config/template-object/notifications.cfg $(DESTDIR)$(CFGDIR)/objects/notifications.cfg
+	$(INSTALL) -b -m 664 $(INSTALL_OPTS) sample-config/template-object/timeperiods.cfg $(DESTDIR)$(CFGDIR)/objects/timeperiods.cfg
+	$(INSTALL) -b -m 664 $(INSTALL_OPTS) sample-config/template-object/localhost.cfg $(DESTDIR)$(CFGDIR)/objects/localhost.cfg
+	$(INSTALL) -b -m 664 $(INSTALL_OPTS) sample-config/template-object/windows.cfg $(DESTDIR)$(CFGDIR)/objects/windows.cfg
+	$(INSTALL) -b -m 664 $(INSTALL_OPTS) sample-config/template-object/printer.cfg $(DESTDIR)$(CFGDIR)/objects/printer.cfg
+	$(INSTALL) -b -m 664 $(INSTALL_OPTS) sample-config/template-object/switch.cfg $(DESTDIR)$(CFGDIR)/objects/switch.cfg
+
+	@echo ""
+	@echo "*** Config files installed ***"
+	@echo ""
+	@echo "Remember, these are *SAMPLE* config files.  You'll need to read"
+	@echo "the documentation for more information on how to actually define"
+	@echo "services, hosts, etc. to fit your particular needs."
+	@echo ""
+
+install-testconfig:
+	$(INSTALL) -m 775 $(INSTALL_OPTS) -d $(DESTDIR)$(CFGDIR)/tests
+	for file in tests/etc/*.cfg; \
+	do $(INSTALL) -b -m 664 $(INSTALL_OPTS) $$file $(DESTDIR)$(CFGDIR)/tests; done
+
+
+install-webconf:
+	$(MKDIR) -p -m 775 $(DESTDIR)$(HTTPD_CONF)
+	$(INSTALL) -m 644 sample-config/httpd.conf $(DESTDIR)$(HTTPD_CONF)/icinga.conf
+
+	@echo ""
+	@echo "*** Icinga/Apache conf file installed ***"
+	@echo ""
+
+install-idoutils:
+	@if [ x$(USE_IDOUTILS) = xyes ]; then \
+		cd $(SRC_IDOUTILS) && $(MAKE) $@ ;\
+	fi
+	@if [ x$(USE_IDOUTILS) = xyes ]; then \
+		echo "" ;\
+		echo "*** IDOUtils installed ***" ;\
+		echo "" ;\
+		echo "!!! ATTENTION !!!" ; \
+        	echo "	idomod.o was renamed to idomod.so, module extension is now .so" ;\
+		echo "	idomod.so will now be installed to $(DESTDIR)$(LIBDIR) " ;\
+		echo "	" ;\
+		echo "	Check your config within wether icinga.cfg:broker_module OR" ;\
+		echo "	module definition in modules/ and update to the new path!!!" ;\
+		echo "!!! ATTENTION !!!" ;\
+		echo "" ;\
+		echo "Please check Changelog - CHANGES for more information!" ;\
+		echo "Upgrade docs available at http://docs.icinga.org/latest/en/upgrading_idoutils.html " ;\
+		echo "" ;\
+	else \
+		echo "" ;\
+		echo "Sorry, IDOUtils not enabled!" ;\
+		echo "Try again with ./configure --enable-idoutils" ;\
+		echo "" ;\
+	fi
+
+install-init: install-daemoninit
+
+install-daemoninit:
+	$(INSTALL) -m 755 -d $(INIT_OPTS) $(DESTDIR)$(INIT_DIR)
+	$(INSTALL) -m 755 $(INIT_OPTS) daemon-init $(DESTDIR)$(INIT_DIR)/icinga
+
+	@if [ x$(USE_IDOUTILS) = xyes ]; then \
+		$(INSTALL) -m 755 $(INIT_OPTS) rc.ido2db $(DESTDIR)$(INIT_DIR)/ido2db ;\
+	fi
+
+	@echo ""
+	@echo "*** Init script installed ***"
+	@echo ""
+
+
+install-commandmode:
+	$(INSTALL) -m 775 $(COMMAND_OPTS) -d $(DESTDIR)$(EXTCMDFILEDIR)
+	chmod g+s $(DESTDIR)$(EXTCMDFILEDIR)
+
+	@echo ""
+	@echo "*** External command directory configured ***"
+	@echo ""
+
+install-eventhandlers:
+	$(INSTALL) -m 775 $(INSTALL_OPTS) -d $(DESTDIR)$(EVENTHANDLERDIR)
+	$(INSTALL) -m 775 $(INSTALL_OPTS) -d $(DESTDIR)$(EVENTHANDLERDIR)/distributed-monitoring
+	$(INSTALL) -m 775 $(INSTALL_OPTS) -d $(DESTDIR)$(EVENTHANDLERDIR)/redundancy-scenario1
+	$(INSTALL) -b -m 774 $(INSTALL_OPTS) contrib/eventhandlers/submit_check_result $(DESTDIR)$(EVENTHANDLERDIR)/submit_check_result
+	$(INSTALL) -b -m 774 $(INSTALL_OPTS) contrib/eventhandlers/disable_active_service_checks $(DESTDIR)$(EVENTHANDLERDIR)/disable_active_service_checks
+	$(INSTALL) -b -m 774 $(INSTALL_OPTS) contrib/eventhandlers/enable_active_service_checks $(DESTDIR)$(EVENTHANDLERDIR)/enable_active_service_checks
+	$(INSTALL) -b -m 774 $(INSTALL_OPTS) contrib/eventhandlers/disable_notifications $(DESTDIR)$(EVENTHANDLERDIR)/disable_notifications
+	$(INSTALL) -b -m 774 $(INSTALL_OPTS) contrib/eventhandlers/enable_notifications $(DESTDIR)$(EVENTHANDLERDIR)/enable_notifications
+	$(INSTALL) -b -m 774 $(INSTALL_OPTS) contrib/eventhandlers/distributed-monitoring/obsessive_svc_handler $(DESTDIR)$(EVENTHANDLERDIR)/distributed-monitoring/obsessive_svc_handler
+	$(INSTALL) -b -m 774 $(INSTALL_OPTS) contrib/eventhandlers/distributed-monitoring/submit_check_result_via_nsca $(DESTDIR)$(EVENTHANDLERDIR)/distributed-monitoring/submit_check_result_via_nsca
+	$(INSTALL) -b -m 774 $(INSTALL_OPTS) contrib/eventhandlers/redundancy-scenario1/handle-master-host-event $(DESTDIR)$(EVENTHANDLERDIR)/redundancy-scenario1/handle-master-host-event
+	$(INSTALL) -b -m 774 $(INSTALL_OPTS) contrib/eventhandlers/redundancy-scenario1/handle-master-proc-event $(DESTDIR)$(EVENTHANDLERDIR)/redundancy-scenario1/handle-master-proc-event
+
+	@echo ""
+	@echo "*** Sample Eventhandlers installed ***"
+	@echo ""
+
+
+fullinstall:
+	@if [ x$(USE_IDOUTILS) = xyes ]; then \
+		${MAKE} install install-init install-commandmode install-webconf install-idoutils install-eventhandlers;\
+		echo "Run make install-config for installing/overwriting the configs..." ;\
+        else \
+		${MAKE} install install-init install-commandmode install-webconf ;\
+		echo "Run make install-config for installing/overwriting the configs..." ;\
+        fi
+
+# Uninstall is too destructive if base install directory is /usr, etc.
+#uninstall:
+#	rm -rf $(DESTDIR)$(BINDIR)/icinga $(DESTDIR)$(CGIDIR)/*.cgi $(DESTDIR)$(CFGDIR)/*.cfg $(DESTDIR)$(HTMLDIR)
+
+#
+# Targets for creating packages on various architectures
+#
+
+# Solaris pkgmk
+PACKDIR=@PACKDIR@
+VERSION=@VERSION@
+SOL_PKG_NAME=@SOL_PKG_NAME@
+SUN_OS_RELEASE=$(shell uname -r | cut -f2 -d. )
+SUN_PLATFORM=$(shell uname -p)
+
+Prototype:
+	rm -rf $(PACKDIR)
+	mkdir -p $(PACKDIR)
+	mkdir -p $(PACKDIR)/$(CFGDIR)/objects
+	$(MAKE) all
+	$(MAKE) DESTDIR=$(PACKDIR) INIT_OPTS='' INSTALL_OPTS='' COMMAND_OPTS='' icinga_grp='' icinga_usr='' \
+	    install install-commandmode install-webconf install-idoutils
+	cd sample-config; \
+	for file in *.cfg; \
+	do \
+	    $(INSTALL) -m 644 $$file $(PACKDIR)/$(CFGDIR)/$$file.$(VERSION); \
+	done
+	chmod 640 $(PACKDIR)/$(CFGDIR)/resource.cfg.$(VERSION)
+	cd sample-config/template-object; \
+	for file in *.cfg; \
+	do \
+	    $(INSTALL) -m 644 $$file $(PACKDIR)/$(CFGDIR)/objects/$$file.$(VERSION); \
+	done
+	mkdir -p $(PACKDIR)/lib/svc/method/
+	$(INSTALL) -o root -g bin -m 555 daemon-init $(PACKDIR)/lib/svc/method/icinga
+	mkdir -p $(PACKDIR)/var/svc/manifest/application/
+	sed 's%!CFGPREFIX!%$(CFGDIR)%g' solaris/icinga.xml.tpl > solaris/icinga.xml
+	$(INSTALL) -m 444 -o root -g root solaris/icinga.xml $(PACKDIR)/var/svc/manifest/application/
+	#cd contrib; $(MAKE) all; $(MAKE) DESTDIR=$(PACKDIR) INIT_OPTS='' INSTALL_OPTS='' COMMAND_OPTS='' icinga_grp='' icinga_usr='' install
+	echo i pkginfo > solaris/Prototype
+	if [ -f solaris/checkinstall.in ] ; then cat solaris/checkinstall.in | sed 's/!SUN_PLATFORM!/$(SUN_PLATFORM)/g' > solaris/checkinstall; fi
+	cd solaris; \
+	for file in checkinstall preinstall postinstall preremove postremove depend i.manifest r.manifest; \
+	do \
+	    if [ -f $$file ] ; then echo i $$file >> Prototype; fi ; \
+	done
+	pkgproto $(PACKDIR)=/ | sed -e "s|$(LOGNAME) $(GROUP)$$|root root|" | egrep -v "(s|d) none (/ |/var|/usr|/etc|/lib)" >> solaris/Prototype
+
+pkg/icinga/pkgmap: Prototype
+	mkdir $(PACKDIR)/$(SOL_PKG_NAME)
+	cd solaris; pkgmk -o -r / -f Prototype -d $(PACKDIR) $(SOL_PKG_NAME)
+
+icinga.sun.pkg.tar.gz: pkg/icinga/pkgmap
+	cd $(PACKDIR) && tar -cf - icinga | gzip -9 -c > ../icinga-$(VERSION)-Sol$(SUN_OS_RELEASE)-$(SUN_PLATFORM).pkg.tar.gz
+
+icinga.sun.pkg: pkg/icinga/pkgmap
+	pkgtrans -s $(PACKDIR) ../icinga-$(VERSION)-Sol$(SUN_OS_RELEASE)-$(SUN_PLATFORM).pkg $(SOL_PKG_NAME)
+
+pkgsettar: icinga.sun.pkg.tar.gz
+
+pkgset: icinga.sun.pkg
+
+pkgclean:
+	rm -rf solaris_pkg solaris/Prototype icinga-$(VERSION)-$(SUN_PLATFORM).pkg.tar.gz icinga-$(VERSION)-$(SUN_PLATFORM).pkg
+

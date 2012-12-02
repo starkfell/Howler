@@ -1,0 +1,514 @@
+######################################################
+#                                                    #
+# OpCfg Change Log - Initial Start Date - 04.12.2012 #
+#                                                    #
+######################################################
+
+11.25.2012 - [R. Irujo]
+	   - v1.2.4
+	   - Added in a new 'OpCfg_Initial_Config' file called 'OpCfg_Initial_Config_Icinga_Core_1.8.1_11.25.12-2248EST.sql' to the 'sqldata'
+	     directory.
+	   - Removed all previous 'OpCfg_Initial_Config' files created berore 11.25.12.
+
+
+11.14.2012 - [R. Irujo]
+	   - v1.2.3
+	   - Added in a new 'OpCfg_Initial_Config' file called 'OpCfg_Initial_Config_Icinga_Core_1.8.1_11.14.12-1518EST.sql' to the 'sqldata'
+             directory.
+
+
+11.03.2012 - [R. Irujo]
+	   - v1.2.2
+	   - Added Several New Options to the 'main.php' File for compatibility up to Icinga Core 1.8.1.
+             New Items available under the 'Main Config' section in 'OpCfg' include:
+		Sync Retention File
+		Stalking Notifications For Hosts
+		Stalking Notifications For Services
+		Time Change Threshold
+		Host Performance Data File Template
+		Service Performance Data File Template
+	 	Timezone Option
+		Keep Unknown Macros Option
+		Event Profiling
+		Limit Number Of Items In Check Results List
+
+           - Several New Columns were added to the 'nagios_main' table in the 'opcfg' database to support the Features listed above.
+
+		ALTER TABLE nagios_main ADD sync_retention_file varchar(255) default "/usr/local/icinga/var/sync.dat" AFTER state_retention_file;
+		ALTER TABLE nagios_main ADD stalking_notifications_for_hosts int(20) default "2";
+		ALTER TABLE nagios_main ADD stalking_notifications_for_services int(20) default "2";
+		ALTER TABLE nagios_main ADD time_change_threshold int(20) default "900";
+		ALTER TABLE nagios_main ADD host_perfdata_file_template varchar(255) default NULL;
+		ALTER TABLE nagios_main ADD service_perfdata_file_template varchar(255) default NULL;
+		ALTER TABLE nagios_main ADD use_timezone varchar(255) default NULL;
+		ALTER TABLE nagios_main ADD keep_unknown_macros int(20) default "2";
+		ALTER TABLE nagios_main ADD event_profiling_enabled int(20) default "1";
+		ALTER TABLE nagios_main ADD max_check_result_list_items int(2) default "-1";
+
+
+           - Added Several New Options to the 'cgi.php' File for compatibility up to Icinga Core 1.8.1.
+             New Items available under the 'CGI Config' section in 'OpCfg' include:
+		
+		Use SSL Authentication
+		Show All Services Host Is Authorized For
+		Allow User(s) Full Command Line View
+		Deny User(s) Access To Commands And Comments
+		Deny ContactGroup(s) Access To Commands And Comments
+		User(s) Read-Only For Comments
+		ContactGroup(s) Read-Only For Comments
+		Deny User(s) Read-Only For Downtimes
+		Contactgroup(s) Read-Only For Downtimes
+		Default Expiring Disabled Notifications Duration
+		Status Show Long Plugin Output
+		Statusmap Transparency Index Color
+		Color Transparency Index (Red)
+		Color Transparency Index (Green)
+		Color Transparency Index (Blue)
+		CGI Refresh Type
+		Normal Sound
+		TAC Show Only Hard State
+		Enable Splunk Integration
+		Splunk URL
+		Persistent Acknowledge Comments
+		Field Separator For CSV Export
+		Field Enclosure Character For CSV Export
+		CGI Log - Show Initial States
+		CGI Log - Show Current States
+		Show Object Type in Tab Title
+		Show Service State (Hard) And Notification Number
+		Show Service State (Soft) And Notification Number
+		HTTP Character Set
+		Set First Day Of Week
+		Log CGI Commands
+		CGI Log File
+		CGI Log Rotation Method
+		CGI Log Archive Path
+		Enforce Comments On Actions
+		Show Tactical Header (TAC)
+		TAC Show Pending Counts
+		Default Downtime Duration
+		Suppress Maintenance Downtime
+		Show Partial Hostgroups
+		Highlight Table Rows
+		Default Expiring Acknowledgement Duration
+		Show Child Hosts
+		Display Host/Service Status Totals
+		Limit Number Of Page Entries Displayed
+		Convert Username To Lowercase
+
+           - Several New Columns were added to the 'nagios_cgi' table in the 'opcfg' database to support the Features listed above.
+
+		ALTER TABLE nagios_cgi ADD use_ssl_authentication int(20) default "0" AFTER use_authentication;
+		ALTER TABLE nagios_cgi ADD show_all_services_host_is_authorized_for int(20) default "1";
+		ALTER TABLE nagios_cgi ADD authorized_for_full_command_resolution varchar(255) default "icingaadmin" AFTER default_user_name;
+		ALTER TABLE nagios_cgi ADD authorized_for_read_only varchar(255) default NULL AFTER authorized_for_all_service_commands;
+		ALTER TABLE nagios_cgi ADD authorized_contactgroup_for_read_only varchar(255) default NULL AFTER authorized_for_read_only;
+		ALTER TABLE nagios_cgi ADD authorized_for_comments_read_only varchar(255) default NULL AFTER authorized_contactgroup_for_read_only;
+		ALTER TABLE nagios_cgi ADD authorized_contactgroup_for_comments_read_only varchar(255) default NULL AFTER authorized_for_comments_read_only;
+		ALTER TABLE nagios_cgi ADD authorized_for_downtimes_read_only varchar(255) default NULL AFTER authorized_contactgroup_for_comments_read_only;
+		ALTER TABLE nagios_cgi ADD authorized_contactgroup_for_downtimes_read_only varchar(255) default NULL AFTER authorized_for_downtimes_read_only;
+		ALTER TABLE nagios_cgi ADD default_expiring_disabled_notifications_duration int(20) default "86400" AFTER refresh_rate;
+		ALTER TABLE nagios_cgi ADD status_show_long_plugin_output int(20) default "0";
+		ALTER TABLE nagios_cgi ADD color_transparency_index_r int(20) default "255";
+		ALTER TABLE nagios_cgi ADD color_transparency_index_g int(20) default "255";
+		ALTER TABLE nagios_cgi ADD color_transparency_index_b int(20) default "255";
+		ALTER TABLE nagios_cgi ADD refresh_type int(20) default "1";
+		ALTER TABLE nagios_cgi ADD normal_sound varchar(255) default NULL AFTER service_unknown_sound;
+		ALTER TABLE nagios_cgi ADD tac_show_only_hard_state int(20) default "0";
+		ALTER TABLE nagios_cgi ADD enable_splunk_integration int(20) default "0";
+		ALTER TABLE nagios_cgi ADD splunk_url varchar(255) default NULL;
+		ALTER TABLE nagios_cgi ADD persistent_ack_comments int(20) default "0";
+		ALTER TABLE nagios_cgi ADD csv_delimiter varchar(255) default ";";
+		ALTER TABLE nagios_cgi ADD csv_data_enclosure varchar(255) default "'";
+		ALTER TABLE nagios_cgi ADD showlog_initial_states int(20) default "0";
+		ALTER TABLE nagios_cgi ADD showlog_current_states int(20) default "0";
+		ALTER TABLE nagios_cgi ADD tab_friendly_titles int(20) default "1";
+		ALTER TABLE nagios_cgi ADD add_notif_num_hard int(20) default "0";
+		ALTER TABLE nagios_cgi ADD add_notif_num_soft int(20) default "0";
+		ALTER TABLE nagios_cgi ADD http_charset varchar(255) default "utf-8";
+		ALTER TABLE nagios_cgi ADD first_day_of_week int(20) default "0";
+		ALTER TABLE nagios_cgi ADD use_logging int(20) default "1";
+		ALTER TABLE nagios_cgi ADD cgi_log_file varchar(255) default "/usr/local/icinga/share/log/icinga-cgi.log";
+		ALTER TABLE nagios_cgi ADD cgi_log_rotation_method varchar(255) default "d";
+		ALTER TABLE nagios_cgi ADD cgi_log_archive_path varchar(255) default "/usr/local/icinga/share/log";
+		ALTER TABLE nagios_cgi ADD enforce_comments_on_actions int(20) default "1";
+		ALTER TABLE nagios_cgi ADD show_tac_header int(20) default "1";
+		ALTER TABLE nagios_cgi ADD show_tac_header_pending int(20) default "0";
+		ALTER TABLE nagios_cgi ADD default_downtime_duration int(20) default "7200";
+		ALTER TABLE nagios_cgi ADD suppress_maintenance_downtime int(20) default "1";
+		ALTER TABLE nagios_cgi ADD show_partial_hostgroups int(20) default "0";
+		ALTER TABLE nagios_cgi ADD highlight_table_rows int(20) default "0";
+		ALTER TABLE nagios_cgi ADD default_expiring_acknowledgement_duration int(20) default "86400";
+		ALTER TABLE nagios_cgi ADD extinfo_show_child_hosts int(20) default "0";
+		ALTER TABLE nagios_cgi ADD display_status_totals int(20) default "0";
+		ALTER TABLE nagios_cgi ADD result_limit int(20) default "50";
+		ALTER TABLE nagios_cgi ADD lowercase_user_name int(20) default "1";
+
+           - Several changes and additions were done to the following files that are too numerous to mention:
+		'main.php'
+		'cgi.php'
+		'export.php'
+		'fruity.inc'
+
+	   - Variable Compatibility with older versions of Icinga was put in place for the following Options listed below
+	     by providing an option to have them removed from the Main Configuration before being exported to Icinga.
+
+                Stalking Notifications For Hosts
+                Stalking Notifications For Services
+		Keep Unknown Macros
+		Limit Number Of Items In Check Result List
+
+	   - Code providing this functionality is shown below:
+	
+
+		##### 'Functions' Added to 'fruity.inc' file #####
+
+        	function get_stalking_notifications_for_hosts() {
+                $sql = "SELECT stalking_notifications_for_hosts FROM nagios_main";
+                $result = mysql_query($sql);
+                while($row=mysql_fetch_array($result)){
+                        $return[] = $row;
+                        }
+                return $return;
+        	}
+
+	        function get_stalking_notifications_for_services() {
+                $sql = "SELECT stalking_notifications_for_services FROM nagios_main";
+                $result = mysql_query($sql);
+                while($row=mysql_fetch_array($result)){
+                        $return[] = $row;
+                        }
+                return $return;
+        	}
+
+	        function get_keep_unknown_macros() {
+        	        $sql = "SELECT keep_unknown_macros FROM nagios_main";
+                	$result = mysql_query($sql);
+	                while($row=mysql_fetch_array($result)){
+                        $return[] = $row;
+                        }
+                return $return;
+        	}
+
+	        function get_max_check_result_list_items() {
+	                $sql = "SELECT max_check_result_list_items FROM nagios_main";
+        	        $result = mysql_query($sql);
+                	while($row=mysql_fetch_array($result)){
+                        $return[] = $row;
+                        }
+                return $return;
+        	}
+
+
+		##### Error checking added to the 'fruity.inc' file to see if Variable is Enabled or Not. #####
+
+                if(isset($main_conf['stalking_notifications_for_hosts'])) {
+                        // Check To See if the Stalking Notifications For Hosts Variable is Enabled or Not.
+                        $value = $this->get_stalking_notifications_for_hosts();
+                        if($value == "2") {
+                                unset($main_conf['stalking_notifications_for_hosts']);
+                        }
+                        else {
+                                $main_conf['stalking_notifications_for_hosts'] = $value['0']['stalking_notifications_for_hosts'];
+                        }
+                }
+                if(isset($main_conf['stalking_notifications_for_services'])) {
+                        // Check To See if the Stalking Notifications For Services Variable is Enabled or Not.
+                        $value = $this->get_stalking_notifications_for_services();
+                        if($value == "2") {
+                                unset($main_conf['stalking_notifications_for_services']);
+                        }
+                        else {
+                                $main_conf['stalking_notifications_for_services'] = $value['0']['stalking_notifications_for_services'];
+                        }
+                }
+                if(isset($main_conf['keep_unknown_macros'])) {
+                        // Check To See if the Keep Unknown Macros Option Variable is Enabled or Not.
+                        $value = $this->get_keep_unknown_macros();
+                        if($value == "2") {
+                                unset($main_conf['keep_unknown_macros']);
+                        }
+                        else {
+                                $main_conf['keep_unknown_macros'] = $value['0']['keep_unknown_macros'];
+                        }
+                }
+                if(isset($main_conf['max_check_result_list_items'])) {
+                        // Check To See if the Limit Number Of Items In Check Result List Variable is Enabled or Not.
+                        $value = $this->get_max_check_result_list_items();
+                        if($value == "-1") {
+                                unset($main_conf['max_check_result_list_items']);
+                        }
+                        else {
+                                $main_conf['max_check_result_list_items'] = $value['0']['max_check_result_list_items'];
+                        }
+                }
+
+
+		##### Error checking added to the export.php file to see if Variable is Enabled or Not. #####
+
+
+			                case "stalking_notifications_for_hosts":
+			                	// Check To See if the Stalking Notifications For Hosts Variable is Enabled or Not.
+			                        if($value == 2) {
+		                	        	unset($mainConfig['stalking_notifications_for_hosts']);
+			                        }
+			                        else {
+							$value = $mainConfig['stalking_notifications_for_services'];
+						}
+				                break;
+			                case "stalking_notifications_for_services":
+				                // Check To See if the Stalking Notifications For Services Variable is Enabled or Not.
+			                	if($value == 2) {
+			                        	unset($mainConfig['stalking_notifications_for_services']);
+			                        }
+			                        else {
+							$value = $mainConfig['stalking_notifications_for_services'];
+				                }
+				                break;
+                                        case "keep_unknown_macros":
+                                                // Check To See if the Keep Unknown Macros Option Variable is Enabled or Not.
+                                                if($value == 2) {
+                                                        unset($mainConfig['keep_unknown_macros']);
+                                                }
+                                                else {
+                                                        $value = $mainConfig['keep_unknown_macros'];
+                                                }
+                                        case "max_check_result_list_items":
+                                                // Check To See if the Limit Number Of Items In Check Result List Variable is Enabled or Not.
+                                                if($value == -1) {
+                                                        unset($mainConfig['max_check_result_list_items']);
+                                                }
+                                                else {
+                                                        $value = $mainConfig['max_check_result_list_items'];
+                                                }
+                                                break;
+
+
+		##### Variables Added to main.php file for use within the OpCfg GUI. #####
+
+		##### Select Lists for the Variables #####
+		$stalking_notifications_for_hosts_list[] = array("values" => "0", "text" => "Notifications Disabled (Default)");
+		$stalking_notifications_for_hosts_list[] = array("values" => "1", "text" => "Notifications Enabled");
+		$stalking_notifications_for_hosts_list[] = array("values" => "2", "text" => "Variable Disabled (Incompatible)");
+
+		$stalking_notifications_for_services_list[] = array("values" => "0", "text" => "Notifications Disabled (Default)");
+		$stalking_notifications_for_services_list[] = array("values" => "1", "text" => "Notifications Enabled");
+		$stalking_notifications_for_services_list[] = array("values" => "2", "text" => "Variable Disabled (Incompatible)");
+
+		$keep_unknown_macros_list[] = array("values" => "0", "text" => "Remove Macros From Output");
+		$keep_unknown_macros_list[] = array("values" => "1", "text" => "Keep Old Macro Behavior (Legacy)");
+		$keep_unknown_macros_list[] = array("values" => "2", "text" => "Variable Disabled (Incompatible)");
+
+		##### Variable Definitions That Appear in OpCfg GUI #####################################################
+
+                        <label for="stalking_notifications_for_hosts" style="width:300px; float:left"><b>Stalking Notifications For Hosts:</b></label>
+                        <?php print_select("main_config[stalking_notifications_for_hosts]", $stalking_notifications_for_hosts_list, "values", "text", $_SESSION['tempData']['main_config']['stalking_notifications_for_hosts']);?>
+                        <?=$fruity->element_desc("stalking_notifications_for_hosts", "nagios_main_desc"); ?>
+                        <br />
+                        <br />
+
+                        <label for="stalking_notifications_for_services" style="width:300px; float:left"><b>Stalking Notifications For Services:</b></label>
+                        <?php print_select("main_config[stalking_notifications_for_services]", $stalking_notifications_for_services_list, "values", "text", $_SESSION['tempData']['main_config']['stalking_notifications_for_services']);?>
+                        <?=$fruity->element_desc("stalking_notifications_for_services", "nagios_main_desc"); ?>
+                        <br />
+                        <br />
+
+                        <label for="keep_unknown_macros" style="width:350px; float:left"><b>Keep Unknown Macros Option:</b></label>
+                        <?php print_select("main_config[keep_unknown_macros]", $keep_unknown_macros_list, "values", "text", $_SESSION['tempData']['main_config']['keep_unknown_macros']);?> - Available starting in Icinga 1.8
+                        <?=$fruity->element_desc("keep_unknown_macros", "nagios_main_desc"); ?>
+                        <br />
+                        <br />
+
+                        <label for="max_check_result_list_items" style="width:300px; float:left"><b>Limit Number Of Items In Check Result List:</b></label>
+                        <input type="text" size="10" maxlength="10" name="main_config[max_check_result_list_items]"  value="<?=$_SESSION['tempData']['main_config']['max_check_result_list_items'];?>"> - Available Starting in Icinga 1.8 - ( <b>0</b> = Disables Feature, <b>-1</b> = Disables Variable )
+                        <?=$fruity->element_desc("max_check_result_list_items", "nagios_main_desc"); ?>
+                        <br />
+                        <br />
+
+		#########################################################################################################
+
+
+
+10.03.2012 - [R. Irujo]
+	   - v1.2.1
+           - Added in a new 'OpCfg_Initial_Config' file called 'OpCfg_Initial_Config_10.03.12-1639EST.sql' to the 'sqldata'
+             directory.
+	   - Previous 'Opcfg_Initial_Config' files have been removed from the 'sqldata' directory.
+
+
+10.02.2012 - [R. Irujo]
+	   - v1.2.0
+	   - Updated the 'update_multiple_service_contactgroups.php' file so that is now displays the Name of the Host
+	     whose Services are having its contacts modified. Note that this change is temporary and will have a more
+             permanent solution later that will utilize the existing functions in the 'hosts.php' file.
+	   - The 'fruity.inc' file in the '/include' directory has a new function to enable this feature:
+	     'get_host_name'  
+
+
+10.02.2012 - [R. Irujo]
+	   - v1.1.9
+	   - Removed the 'Import' function from the Build.
+	   - Removed the reference for the 'Import' function from the Main Page Header located in the 'output.php' file.
+
+
+10.02.2012 - [R. Irujo]
+	   - v1.1.8
+	   - Removed the 'Add Multiple Hosts - XML' function from the Build.
+	   - Removed the reference for the 'Add Multiple Hosts - XML' function from the Main Page Header located in the 'output.php' file.
+
+
+07.11.2012 - [R. Irujo]
+           - v1.1.7
+           - Added in a new 'OpCfg_Initial_Config' file called 'OpCfg_Initial_Config_07.11.12-1106EST.sql' to the 'sqldata'
+             directory.
+
+
+06.17.2012 - [R. Irujo]
+	   - v1.1.6
+	   - Added the ability to change multiple Service Contact Groups for all Services belonging to a Single Host.
+	     A new file was added to the build to provide this feature called 'update_multiple_service_contactgroups.php'.
+	   - The 'fruity.inc' file in the '/includes' directory has two new function to enable this feature:
+	     'get_host_services'
+             'get_host_service_contactgroups'
+	   - The 'host.inc' file in the '/includes' directory has a new link called 'All Host Services Contact Groups'
+             which links to 'update_multiple_service_contactgroups.php'.
+
+
+06.08.2012 - [R. Irujo]
+	   - v1.1.5
+	   - Modified the function 'documentation_search_services' in the 'fruity.inc' so that duplicate Service Row
+             entries were not being returned. This was accomplished by removing entries that querying the 
+             Notification Tables (such as 'nagios_contactgroups' and 'nagios_service_contactgroups') in 'OpCfg'. 
+	     This was necessary as duplicate Service Rows were appearing in the 'Host Documentation' feature in the 'OpCfg UI'.
+
+
+06.07.2012 - [R. Irujo]
+	   - v1.1.4
+	   - Added functionality to create 'Host and Service Documentation in Wiki Format' to the 'OpCfg UI'. 
+             Two new files were added to the build that enable this feature:
+	     'update_host_doc_search.php'
+	     'update_host_doc_post.php'
+	   - The 'fruity.inc' file in the 'includes/' directory has three new functions to enable this feature:
+	     'documentation_search_services'
+	     'documentation_search_parameters'
+	     'documentation_search_notifications'
+	   - The 'output.php' file in the 'output/' directory has a new entry after the 'Hosts' entry to link to
+	     the 'update_host_doc_search.php' page.
+
+
+05.30.2012 - [R. Irujo]
+	   - v1.1.3
+	   - Added in the 'logos' directory to fix broken image links in the OpCfg UI.
+           - Added in a new 'OpCfg_Initial_Config' file called 'OpCfg_Initial_Config_05.30.12-2018EST.sql' to the 'sqldata'
+             directory.
+
+
+05.26.2012 - [R. Irujo]
+	   - v1.1.2
+	   - Added in a new 'OpCfg_Initial_Config' file called 'OpCfg_Initial_Config_05.26.12-1104EST.sql' to the 'sqldata' 
+             directory.
+
+
+05.12.2012 - [R. Irujo]
+	   - v1.1.1
+           - 'README_CHANGE_LOG' renamed to 'README_MON_CHANGES'.
+           - Added in a new 'OpCfg_Initial_Config' file called 'OpCfg_Initial_Config_05.13.12-1409EST.sql' to the 'sqldata'
+             directory.
+             A plethora of additional commands have been added to the 'OpCfg_Initial_Config' sql file which are listed below:
+             |----------------------------------------|
+              check_nrpe_agent_version
+              icinga-notify-host-by-email-html
+              icinga-notify-service-by-email-html
+              icinga_check_adaptive-auth-time
+              icinga_check_bonding
+              icinga_check_clamav
+              icinga_check_disk
+              icinga_check_dns
+              icinga_check_file_count
+              icinga_check_file_size
+              icinga_check_ip_rules
+              icinga_check_ldap
+              icinga_check_ldap_sync
+              icinga_check_load
+              icinga_check_ntp
+              icinga_check_ntp_time
+              icinga_check_port
+              icinga_check_powerpath
+              icinga_check_process_count
+              icinga_check_ps_service
+              icinga_check_service
+              icinga_check_squid_stats
+              icinga_check_swap_percent
+              icinga_check_sys_uptime
+              icinga_check_users
+              icinga_check_vol_rw
+              icinga_check_yahooapi
+              icinga_check_zombie_procs
+              url_content_check
+             |----------------------------------------|
+
+
+04.29.2012 - [R. Irujo]
+           - v1.1.0
+           - Added in changes in the 'opcfg.spec' file to modify File and Folder Permissions in Icinga
+             to ensure that OpCfg works properly.
+
+
+04.25.2012 - [R. Irujo]
+           - v1.0.9
+           - 'README_INSTALLATION_GUIDE' updated.
+
+
+04.14.2012 - [R. Irujo]
+           - v1.0.8
+           - 'OpCfg_Backup' Folder and placeholder files added to the RPM Installation
+           - Renamed 'RPM' naming convention to 'mon-mon-opcfg'
+             RPM:            'mon-mon-opcfg-1.0-1.0.8.x86_64.rpm'
+             Tarball Source: 'mon-mon-opcfg-1.0.1.0.8.tar.gz'
+
+
+04.14.2012 - [R. Irujo]
+           - v1.0.7
+           - Initial 'RPM Build' Completed Successfully.
+             RPM:            'mon-opcfg-1.0-1.0.7.x86_64.rpm'
+             Tarball Source: 'mon-opcfg-1.0-1.0.7.tar.gz'
+
+
+04.12.2012 - [R. Irujo]
+	   - v1.0.7
+	   - Added Several New Options to the 'main.php' File to support several Icinga Based Features
+             New Items available under the 'Main Config' section in 'OpCfg' include:
+             Logging Options for Daemon                     - Use Daemon Log
+             Syslog Facility                                - Use Syslog Local Facility
+             Syslog Local Facility                          - Syslog Local Facility
+             Current States Loggin Option                   - Log Current States
+             Log External Command User                      - Log External Command User
+             Long Plugin Output Logging Option              - Long Plugin Output Logging Option 
+             Dump Retained Host Service States To NEB       - Dump Retained Host and Service States To NEB
+             Host Performance Data Process Empty Results    - Process Empty Hosts Performance Results
+             Service Performance Data Process Empty Results - Process Empty Service Performance Results
+             Allow Empty Hostgroup Assignment For Services  - Allow Empty Hostgroup Assignment For Services
+             Service Check Timeout State                    - Service Check Timeout State
+             Service Freshness Check Interval               - Service Freshness Check Interval
+             Stalking Event Handlers For Hosts              - Stalking Event Handlers For Hosts
+             Stalking Event Handlers For Services           - Stalking Event Handlers For Services
+	     Child Process Forking Behavior                 - Child Process Forking Behavior
+
+           - Several New Columns were added to the 'opcfg' database to support the Features listed above
+             The following columns were added to the 'nagios_main' table:
+             use_daemon_log enum('0','1') default NULL,
+	     use_syslog_local_facility enum('0','1') default NULL,
+             syslog_local_facility int(20) default NULL,
+             log_current_states enum('0','1') default NULL,
+             log_external_commands_user enum('0','1') default NULL,
+             log_long_plugin_output enum('0','1') default NULL,
+             dump_retained_host_service_states_to_neb enum('0','1') default NULL,
+             host_perfdata_process_empty_results enum('0','1') default NULL,
+             service_perfdata_process_empty_results enum('0','1') default NULL,
+             allow_empty_hostgroup_assignment enum('0','1') default NULL,
+             service_check_timeout_state enum('c','u','w','o') default NULL,
+             service_freshness_check_interval int(20) default NULL,
+             stalking_event_handlers_for_hosts enum('0','1') default NULL,
+             stalking_event_handlers_for_services enum('0','1') default NULL,
+             child_processes_fork_twice enum('0','1') default NULL;
+

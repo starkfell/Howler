@@ -1,0 +1,47 @@
+#!/usr/bin/perl
+#
+#  --- [icinga_check_ldap_sync] Perl Script for Icinga ---
+#
+# Author(s):     Ryan Irujo
+# Inception:     03.16.2012
+# Last Modified: 03.19.2012
+#
+# Changes:       03.19.2012 - [R.Irujo] - Added Performance Data Support
+#
+# Description:   Runs an check to see if LDAP is in Sync by testing an LDAP Master and Slave Server against each other
+#                using the 'ldap-sync-check' script.
+#
+# Command Line:  ./icinga_check_ldap_sync "[LDAP_Master]" "[LDAP_Slave]"
+# NRPE Examples: ./check_nrpe -H srv101.fabrikam.com -c icinga_check_ldap_sync -a "-m master101.nul.com" "slave101.nul.com"
+
+use Time::HiRes qw(gettimeofday tv_interval);
+
+chomp($HostName =`hostname`);
+
+$LDAP_Master = $ARGV[0];
+$LDAP_Slave  = $ARGV[1];
+
+# Validating Parameters passed to the Script.
+if (!defined $LDAP_Master || $LDAP_Master eq ""){
+        print "An [LDAP_Master] Server must be provided.\n";exit 3;
+        }
+if (!defined $LDAP_Slave || $LDAP_Slave eq ""){
+        print "An {LDAP_Slave] Server must be provided.\n";exit 3;
+        }
+
+#LDAP Sync Check Start Time and LDAP Sync Check
+$Query_Start = [gettimeofday];
+chomp($Sync_Check = `/usr/lib64/nagios/plugins/ldap-sync-check -m $LDAP_Master -s $LDAP_Slave 2>/dev/null`);
+
+#LDAP Sync Check Finish Time and Final Calculation
+$Query_End = [gettimeofday];
+$Run_Time  = tv_interval $Query_Start, $Query_End;
+
+#Results from LDAP Sync Check are processed and returned.
+if ($Sync_Check =~/Error/){
+        print "LDAP Sync Check of [$LDAP_Slave] with [$LDAP_Master] Failed! Login to $HostName and run the 'ldap-sync-check' script.|'LDAPSync'=$Run_Time\s;;;0.000000;60.000000;\n"; exit 2;
+        }
+elsif ($Sync_Check =~/sync/ ){
+        print "Sync Check of [$LDAP_Slave] with [$LDAP_Master] from $HostName was successful.|'LDAPSync'=$Run_Time\s;;;0.000000;60.000000;\n";exit 0;
+        }
+

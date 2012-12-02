@@ -1,0 +1,61 @@
+#!/usr/bin/perl
+#
+#  --- [icinga_check_users] Perl Script for Icinga ---
+#
+# Author(s):     Ryan Irujo
+# Inception:     05.28.2012
+# Last Modified: 11.25.2012
+#
+# Description:   Script that calls on the 'check_users' Nagios Plugin and returns back the current
+#                number of Users logged into a Host, Performance Data from the 'check_users' Plugin and
+#                additional Performance Data based upon how long the check took to run.
+#
+#
+# Changes:       11.25.2012 - [R. Irujo]
+#		 - Renamed the file 'icinga_check_users_v2' to 'icinga_check_users'.
+#
+#
+# Command Line:  ./icinga_check_users "[Warning_Value]" "[Critical_Value]"
+# NRPE Examples: ./check_nrpe -H srv101.fabrikam.com -c icinga_check_users "20" "50"
+
+use Time::HiRes qw(gettimeofday tv_interval);
+chomp($HostName =`hostname`);
+
+$Warning  = $ARGV[0];
+$Critical = $ARGV[1];
+
+if (!defined $Warning || $Warning eq ""){
+        print "A [Warning_Value] has not been provided.\n";exit 3;
+        }
+if (!defined $Critical || $Critical eq ""){
+        print "A [Critical_Value] has not been provided.\n";exit 3;
+        }
+
+
+# Check Users Start Time
+$Query_Start = [gettimeofday];
+
+# Check Users
+chomp($Check_Users = `/usr/lib64/nagios/plugins/check_users -w $Warning -c $Critical `);
+
+# Check Users End Time and Final Calculation
+$Query_End = [gettimeofday];
+$Run_Time  = tv_interval $Query_Start, $Query_End;
+
+
+# Final Results and Performance Data are Calculated.
+if(!$Check_Users){
+        print "There was a problem accessing the [check_users] Nagios Plugin, login to [$HostName] and see if the [check_users] Plugin is in the [/usr/lib64/nagios/plugins] Directory.\n";exit 3;
+        }
+elsif($Check_Users =~ m/WARNING/i) {
+    print "$Check_Users 'Check_Time'=$Run_Time\s;;;0.000000;60.000000;\n";exit 1;
+        }
+elsif($Check_Users =~ m/CRITICAL/i) {
+    print "$Check_Users 'Check_Time'=$Run_Time\s;;;0.000000;60.000000;\n";exit 2;
+        }
+elsif($Check_Users =~ m/OK/i) {
+    print "$Check_Users 'Check_Time'=$Run_Time\s;;;0.000000;60.000000;\n";exit 0;
+        }
+
+
+

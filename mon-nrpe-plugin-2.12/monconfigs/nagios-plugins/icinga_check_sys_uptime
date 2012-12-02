@@ -1,0 +1,34 @@
+#!/usr/bin/perl
+#
+#  --- [icinga_check_sys_uptime] Perl Script for Icinga ---
+#  
+# Author:        Ryan Irujo
+# Inception:     01.13.2012
+# Last Modified: 03.21.2012
+#
+# Changes:       03.21.2012 - [R.Irujo] - Added 'seconds' syntax to the print statement in the Critical Result.
+#                
+# Command Line:  ./icinga_check_sys_uptime "5000"
+# NRPE Call:     ./check_nrpe -H testserver201.fabrikam.com -c icinga_check_sys_uptime -a "600"
+
+use Scalar::Util qw(looks_like_number);
+
+chomp($hostname =`hostname`);
+
+$critical   = $ARGV[0];
+$get_uptime = `cat /proc/uptime`;
+@uptime     = split(/ /, $get_uptime);
+$uptime     = int(@uptime[0]);
+
+if (!defined $critical || $critical eq ""){
+	print "Argument Value for [seconds] has not been provided.\n";exit 3;
+	}
+elsif (!looks_like_number($critical)){
+	print "Arugment Value for [seconds] needs to be a number!\n";exit 3;
+	}
+elsif ($uptime < $critical){
+	print "$hostname has been up for ($uptime) seconds. This Host has recently been restarted! | 'SysUpTime'=$uptime;0.00;1.0;0.00;10000000000;\n";exit 2;
+	}
+else {print "$hostname has been up for ($uptime) seconds. | 'SysUpTime'=$uptime;0.00;1.0;0.00;10000000000;\n";exit 0;
+	}
+

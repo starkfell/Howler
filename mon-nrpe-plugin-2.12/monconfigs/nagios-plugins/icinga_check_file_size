@@ -1,0 +1,50 @@
+#!/usr/bin/perl
+#
+#  --- [icinga_check_file_size] Perl Script for Icinga ---
+#
+# Author(s):     Ryan Irujo
+# Inception:     03.14.2012
+# Last Modified: 03.14.2012
+# Changes:
+#
+# Description:   Verifies that the File being checked exists and is greater than a file size based 
+#                upon a set threshold. Performance Data is captured in the Result.
+#
+# Command Line:  ./icinga_check_file_size "[Path_To_File]" "[Threshold_File_Size_in_Kilobytes]"
+# NRPE Examples: ./check_nrpe -H srv101.fabrikam.com -c icinga_check_file_size -a "/usr/local/bin/successes" "0.00"
+
+chomp($HostName =`hostname`);
+
+$FileToCheck = $ARGV[0];
+$Threshold   = $ARGV[1];  
+
+# Validating Parameters passed to the Script.
+if (!defined $FileToCheck || $FileToCheck eq ""){
+        print "A [Path_To_File] has not been provided.\n";exit 3;
+        }
+if (!defined $Threshold || $Threshold eq ""){
+        print "A [Threshold_File_Size_in_Kilobytes] has not been provided.\n";exit 3;
+        }
+
+# Making sure the File Exists.
+if (! -e "$FileToCheck") {
+        print "Unable to locate [$FileToCheck]. Login to $HostName and Investigate.\n"; exit 2;
+}
+
+# Checking File Size.
+chomp($FileSize = -s $FileToCheck);
+
+# Converting File Size Check to Kilobytes and formatting using the 'sprintf' function.
+$ConvertToKB = ($FileSize / 1024);
+$FileSizeKB  = sprintf("%.2f", $ConvertToKB);
+
+# Checking if the Size of the File is above or below Threshold.
+if ($FileSizeKB <= $Threshold){
+        print "File Size of [$FileToCheck] is [$FileSizeKB]KB. Login to $HostName and Investigate. | 'FileSize'=$FileSizeKB\KB;;$Threshold;0.00;100000000000;\n" ; exit 2;
+        }
+elsif ($FileSizeKB >= $Threshold){
+        print "File Size of [$FileToCheck] is [$FileSizeKB]KB on $HostName. | 'FileSize'=$FileSizeKB\KB;;$Threshold;0.00;100000000000;\n";exit 0;
+        }
+
+
+

@@ -1,0 +1,17 @@
+#!/bin/bash
+
+#Quick and Dirty MySQL Database Creation Script
+
+MyUSER="root"
+MyPASS="password"
+
+dbName="howler"
+dbUser="howler"
+dbPass="howler"
+
+
+mysql -u $MyUSER -p$MyPASS -Bse "CREATE DATABASE $dbName" && echo "Icinga Database Created.";
+mysql -u $MyUSER -p$MyPASS -Bse "GRANT ALL ON $dbName.* TO '$dbUser'@'localhost' IDENTIFIED BY '$dbPass'" && echo "$dbPass Granted Access to Icinga Database.";
+
+
+

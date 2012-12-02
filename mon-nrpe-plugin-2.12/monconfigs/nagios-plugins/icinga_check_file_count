@@ -1,0 +1,45 @@
+#!/usr/bin/perl
+#
+#  --- [icinga_check_file_count] Perl Script for Icinga ---
+#
+# Author(s):     Ryan Irujo
+# Inception:     03.14.2012
+# Last Modified: 03.14.2012
+# Changes:
+#
+# Description:   Verifies that the Directory being checked exists and contains greater than or 
+#                equal to a set number of files.
+#
+# Command Line:  ./icinga_check_ps_service "[Directory_Path]" "[Threshold_File_Count]"
+# NRPE Examples: ./check_nrpe -H srv101.fabrikam.com -c icinga_check_file_count -a "/usr/lib/bin/" "0"
+
+chomp($HostName =`hostname`);
+
+$PathToCheck = $ARGV[0];
+$Threshold   = $ARGV[1];  
+
+# Validating Parameters passed to the Script.
+if (!defined $PathToCheck || $PathToCheck eq ""){
+        print "A [Directory_Path] has not been provided.\n";exit 3;
+        }
+if (!defined $Threshold || $Threshold eq ""){
+        print "A [Threshold_File_Count] has not been provided.\n";exit 3;
+        }
+
+# Making sure the Directory Exists.
+if (! -d "$PathToCheck") {
+        print "[$PathToCheck] not found. Login to $HostName and Investigate.\n"; exit 2;
+}
+
+# Checking Directory File Count.
+chomp($FileCount = `ls $PathToCheck | wc -l`);
+
+if ($FileCount <= $Threshold){
+        print "[$FileCount] Files found in [$PathToCheck], Login to $HostName and Investigate. | 'FileCount'=$FileCount;;$Threshold;0;1000000;\n"; exit 2;
+        }
+elsif ($FileCount >= $Threshold){
+        print "[$FileCount] Files found in [$PathToCheck] on $HostName. | 'FileCount'=$FileCount;;$Threshold;0;1000000;\n"; exit 0;
+	}
+
+
+

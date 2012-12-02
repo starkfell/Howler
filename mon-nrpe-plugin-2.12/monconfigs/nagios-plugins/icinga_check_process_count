@@ -1,0 +1,64 @@
+#!/usr/bin/perl
+#
+#  --- [icinga_check_process_count] Perl Script for Icinga ---
+#
+# Author:        Ryan Irujo
+# Inception:     05.28.2012
+# Last Modified: 11.25.2012
+#
+# Description:   Script that retrieves the number of running processes on a Host. Notifications are 
+#                sent out based upon a threshold value set if too many processes are running.
+#                Performance Data is returned for the number of processes running and the amount
+#                of time the Plugin took to run on the Host.
+#
+#
+# Changes:       05.29.2012 - [R. Irujo]
+#                - Updated the Command Line Example below.
+#                - Updated the Text Output if an error is returned on the Argument Variable Check.
+#                - Moved the Argument Variable Check section up before the Process Check.
+#
+#	  	 11.25.2012 - [R. Irujo]
+#		 - Renamed file from 'icinga_check_process_count_v2' to 'icinga_check_process_count'.
+#
+#
+# Command Line:  ./icinga_check_process_count "[Critical_Value]"
+# NRPE Call:     ./check_nrpe -H testserver201.fabrikam.com -c icinga_check_process_count "1500"
+
+use Scalar::Util qw(looks_like_number);
+use Time::HiRes qw(gettimeofday tv_interval);
+
+$Critical  = $ARGV[0];
+chomp($HostName =`hostname`);
+
+if (!defined $Critical || $Critical eq ""){
+        print "A [Critical_Value] has not been provided.\n";exit 3;
+        }
+elsif (!looks_like_number($Critical)){
+        print "The [Critical_Value] needs to be a number!\n";exit 3;
+        }
+
+
+# Process Check Start Time
+$Query_Start = [gettimeofday];
+
+#Process Check
+chomp($Process_Count = `ps -aef | wc -l`);
+
+# Disk Space Check End Time and Final Calculation
+$Query_End = [gettimeofday];
+$Run_Time  = tv_interval $Query_Start, $Query_End;
+
+
+# Final Results and Performance Data are Calculated.
+if(!$Process_Count){
+        print "There was a problem retrieving the number of running processes. Login to [$HostName] and run the following command: [ps -aef | wc -l].\n";exit 3;
+        }
+elsif ($Process_Count > $Critical){
+        print "$Process_Count processes found. Process Count is above Threshold! Login to [$HostName] and investigate. | 'Process_Count'=$Process_Count;;$Critical;0;1000000 'Check_Time'=$Run_Time\s;;;0.000000;60.000000\n";exit 2;
+        }
+elsif($Process_Count <= $Critical){
+        print "$Process_Count processes found. | 'Process_Count'=$Process_Count;;$Critical;0;1000000 'Check_Time'=$Run_Time\s;;;0.000000;60.000000\n";exit 0;
+        }
+
+
+

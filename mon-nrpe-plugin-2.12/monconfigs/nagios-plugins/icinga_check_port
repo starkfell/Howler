@@ -1,0 +1,61 @@
+#!/usr/bin/perl
+#
+#  --- [icinga_check_port] Perl Script for Icinga ---
+#
+# Author(s):     Ryan Irujo
+# Inception:     01.20.2012
+# Last Modified: 05.16.2012
+#
+# Changes:       02.24.2012 - [R. Irujo]
+#                Modified the text print output of the results to accurately reflect
+#                whether the check is done via IP Address or Hostname.
+#
+#                05.16.2012 - [R. Irujo]
+#                Added Performance Data to the Script to return a value of "1" if the Network Port
+#                is Open and a "0" if it is not. The length of time that the Script takes to run
+#                has also been added to the Script and is outputted as Performance Data.
+#
+#
+# Command Line:  ./icinga_check_port "10.10.40.3" "80" "tcp"
+# NRPE Call:     ./check_nrpe -H testserver201.fabrikam.com -c icinga_check_ntp -a "10.10.20.1" "8080" "tcp"
+#
+# Notes:         The '$IP' Variable can use either a [Hostname] or [IP Address]. FQDN of the Hostname is recommended.
+
+use Time::HiRes qw(gettimeofday tv_interval);
+use IO::Socket;
+
+$IP       = $ARGV[0];
+$Port     = $ARGV[1];
+$Protocol = $ARGV[2];
+
+
+# Port Check Start Time
+$Query_Start = [gettimeofday];
+
+# Port Check
+my $socket;
+my $check = eval {
+        $socket = new IO::Socket::INET->new(
+                        PeerAddr => $IP,
+                        PeerPort => $Port,
+                        Proto    => $Protocol,
+                        )
+                };
+
+# Port Check End Time and Overall Runtime Calculation.
+$Query_End = [gettimeofday];
+$Run_Time  = tv_interval $Query_Start, $Query_End;
+
+
+# Final Results and Performance Data are Calculated.
+if ($check){
+        $Result = 1;
+        print "Port $Port is available on - $IP | 'Port_State'=$Result;;;0.0;10.0 'Check_Time'=$Run_Time\s;;;0.000000;60.000000;\n";
+        shutdown($socket, 2);exit 0;
+        }
+elsif (!$check){
+        $Result = 0;
+        print "Port $Port is inaccessible on - $IP | 'Port_State'=$Result;;;0.0;10.0 'Check_Time'=$Run_Time\s;;;0.000000;60.000000;\n";exit 2;
+        }
+
+

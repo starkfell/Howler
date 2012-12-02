@@ -1,0 +1,100 @@
+################################################################
+#                                                              #
+# Icinga Change Log - Initial Start Date - 04.03.2012          #
+#                                                              #
+################################################################
+
+12.01.2012 - [R. Irujo]
+	   - v1.0
+	   - Build has been upgraded from Icinga 1.5.1 to Icinga 1.8.1.
+	   - A plethora of changes were made as detailed below. The Version Numbering has also been restarted back at 1.0.
+
+	     The 'sidebar.html' file was added to the 'RPM Build' as it was not explicitly included in '1.8.1' already.
+	     Changed the permissions on 'icinga.log' file to 'howler.howler' after post RPM Build Section.
+	     Added a new 'icinga.conf' file to the build to be added to the 'Apache configuration' post install.
+	     Added new entries to the 'menu.html' file for 'OpCfg', 'PNP4Nagios', and 'icinga-cgi.log'.
+
+	     Added entry to 'icinga.spec' removing the '.htaccess' file from '/usr/local/icinga/share/log' after the 'mon-icinga-gui RPM' install,
+	     opening up access to the 'icinga-cgi.log' file.
+
+	     Modified the 'icinga.spec' file to see if the 'icinga' database already has 'idoutils' installed and to react accordingly.
+	     Updated the 'icinga.conf' Apache file to include sample settings for OpCfg & PNP4Nagios.
+	     Cleaned up the 'monserver-plugins' tarball to only contain the barebone amount of 'nagios-plugins'.
+
+	     Reconfigured the 'RPM' to copy the current 'check_nrpe' plugin from '/usr/lib64/nagios/plugins' to the '/usr/local/icinga/libexec' directory 
+	     if it already exists during the installation.
+
+
+################################################################
+#							       #
+# Change-over from Icinga 1.5.1 to Icinga 1.8.1                #
+#							       #
+################################################################
+
+
+10.09.2012 - [R. Irujo]
+	   - v2.1
+	   - Added the 'status-header.ssi' file to the 'monconfigs' directory which displays the pop-up view of the 
+             PNP4Nagios Graphs in the Icinga UI. This was added here because when you upgrade or reinstall Icinga,
+	     the previous version that was installed during the PNP4Nagios installation is wiped out.
+	   
+
+10.06.2012 - [R. Irujo]
+	   - v2.0
+	   - Added the Icinga Logo to the 'icinga-notify-service-by-email-html' file.
+
+
+09.30.2012 - [R. Irujo]
+	   - v1.9
+	   - Added the Icinga Logo to the 'icinga-notify-host-by-email-html' file.
+
+
+05.12.2012 - [R. Irujo]
+	   - v1.8
+	   - Added updated version of 'icinga-notify-service-by-email-html' to the 'monserver-plugins-1.0.tar.gz'
+             located in the 'monconfigs' directory.
+
+
+05.07.2012 - [R. Irujo]
+           - v1.7
+           - Official Inception of the customized 'icinga.spec' file.
+           - Added 'index.html' to build to redirect all web traffic going to the 'Apache Web Root Directory'
+             to go to 'http://localhost/icinga/'.
+
+
+04.26.2012 - [R. Irujo]
+           - v1.6 
+           - Added default 'username' and 'password' values to the 'database credentials' in the 'ido2db.cfg' file.
+
+
+04.23.2012 - [R. Irujo]
+           - v1.5
+           - 'ido2db init Script' now contains the correct path to the 'ido2db' binary.
+           - Custom 'ido2db init Script' added to the 'monconfigs' directory.
+
+
+04.21.2012 - [R. Irujo]
+           - v1.4
+           - Renamed 'RPM' from 'mon-icinga-1.0.5' to 'mon-icinga-1.0.5' to keep in line with 'OpCfg' and 
+             'NRPE RPM'  naming convention.
+
+04.15.2012 - [R. Irujo]
+           - v1.3
+           - Idoutils updates:
+             ido2db.cfg - added to the 'monconfigs' directory.
+             idomod.cfg - added to the 'monconfigs' directory.
+             'SPEC file' updated to import 'IDOUTILS Tables' into the 'Icinga Database' if it exists.
+
+
+04.11.2012 - [R. Irujo]
+           - v1.2
+           - Inserted Base Monitoring Server Plugins into the '/usr/local/icinga/libexec' directory.
+           - Inserted 'htpasswd.users' file into '/usr/local/icinga/etc/' to allow access to the Icinga Web Interface
+
+
+04.03.2012 - [R. Irujo]
+           - v1.1
+           - Modified the 'icinga' script file located in '/etc/init.d/' to include path to the 'icinga' binary in 
+             '/usr/local/icinga/bin/'
+
+....

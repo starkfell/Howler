@@ -1081,6 +1081,16 @@ class hostObject extends baseObject{
 				</table>
 					<br />
 
+
+                                <!-- Select all Checkboxes Toggle Function -->
+                                <script language="JavaScript">
+                                function SelectAll(source) {
+                                  var checkboxes = document.getElementsByTagName("input");
+                                  for(var i in checkboxes)
+                                    checkboxes[i].checked = source.checked;
+                                        }
+                                </script>
+
 				<form name="formSelected" action="<?=$path_config['doc_root'];?>services.php" method="get">
 				<input type="hidden" name="host_id" value="<?=$_GET['host_id'];?>">
 				<input type="hidden" name="section" value="clone">
@@ -1088,6 +1098,10 @@ class hostObject extends baseObject{
 				<table width="100%" align="center" cellspacing="0" cellpadding="2" border="0">
 					<tr class="altTop">
 					<td colspan="2">Services Explicitly Linked to This Host:</td>
+					</tr>
+                                        <tr style='background-color:#cccccc; width: 10px'>
+                                        <td></td>
+                                        <td><input type='checkbox' onClick='SelectAll(this)' />&nbsp;&nbsp;<b>Select All Services</b></td>
 					</tr>
 					<?php
 					for($counter = 0; $counter < $numOfServices; $counter++) {
@@ -1102,7 +1116,6 @@ class hostObject extends baseObject{
 							<?php
 						}
 
-//						$reports = getReportsByObjcet( $this->tempHostInfo['host_name'], $fruity->return_service_description($hostServiceList[$counter]['service_id']) );
 						$reports = false;
 						if ($reports !== false)
 							$reports = "'$reports'";

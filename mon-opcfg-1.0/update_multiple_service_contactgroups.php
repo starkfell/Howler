@@ -35,14 +35,15 @@ print_window_header("Update a Single Contact Group for Multiple Services on {$Ho
 ?>
 
 
-<!-- Select all Checkboxes Toggle Function -->
+<!-- Select all Checkboxes Toggle Function (IE/Firefox/Chrome Compatible) -->
 <script language="JavaScript">
-function toggle(source) {
-  checkboxes = document.getElementsByName('service_id[]');
-  for(var i in checkboxes)
-    checkboxes[i].checked = source.checked;
+function SelectAll(source) {
+    var checkboxes = document.getElementsByTagName("input");
+    for (var i = 0; i < checkboxes.length; i++)
+        checkboxes[i].checked = source.checked;
 }
 </script>
+
 
 <!-- Creating Navigation Bar manually, for now. Will look into creating Navigation Bar automatically from the 'host.inc' file at a later date. -->
 <a class="sublink" href="<?=$path_config['doc_root'];?>hosts.php?host_id=<?=$_GET['host_id'];?>&section=general">General</a> |
@@ -78,9 +79,8 @@ print_select("contact_group[contactgroup_add][contactgroup_id]", $contactgroups_
 <input type="submit" name="Refresh" value="Refresh Results">
 <br>
 <br>
-<th style='background-color:#FFFFFF; text-align: center;'><font size='1px'>Select All</font>
 <tr>
-<th style='background-color:#cccccc; width: 50px'><font size='1px'><input type='checkbox' onClick='toggle(this)' /></th>
+<th style='background-color:#cccccc; width: 110px'><font size='1px'>Select All Services<br></font><input type='checkbox' onClick='SelectAll(this)' /></th>
 <th style='background-color:#cccccc;'><font size='2px'>Service Name</font></th>
 <th style='background-color:#cccccc;'><font size='2px'>Contact Groups</font></th>
 <th style='background-color:#cccccc;'><font size='1px'>Service ID</font></th>

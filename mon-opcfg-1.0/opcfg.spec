@@ -9,7 +9,7 @@
 
 %define name mon-opcfg
 %define version 1.0
-%define release 1.2.4
+%define release 1.2.5
 
 # Macro that print mesages to syslog at package (un)install time
 %define nnmmsg logger -t %{name}/rpm

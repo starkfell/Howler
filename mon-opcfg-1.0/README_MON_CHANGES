@@ -4,6 +4,13 @@
 #                                                    #
 ######################################################
 
+12.05.2012 - [R. Irujo]
+	   - v1.2.5
+	   - Select All Checkboxes JavaScript Toggle Function added to 'Services' section in 'host.inc' file.
+	   - Select All Checkboxes JavaScript Toggle Function updated in the 'update_multiple_service_contactgroups.php'
+             file to work with Internet Explorer.
+
+
 11.25.2012 - [R. Irujo]
 	   - v1.2.4
 	   - Added in a new 'OpCfg_Initial_Config' file called 'OpCfg_Initial_Config_Icinga_Core_1.8.1_11.25.12-2248EST.sql' to the 'sqldata'

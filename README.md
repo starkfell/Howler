@@ -8,7 +8,7 @@ Howler consists of the following Open-Source Monitoring Tools that are compiled 
 <br>
 Icinga Core (including IDOUtils) 1.8.1<br>
 NRPE 2.12<br>
-OpCfg 1.2.2<br>
+OpCfg 1.0<br>
 PNP4Nagios 0.6.17<br>
 RRDTool 1.4.7<br>
 

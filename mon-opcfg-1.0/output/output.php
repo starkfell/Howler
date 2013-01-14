@@ -576,8 +576,10 @@ function print_frame_header($fruity) {
 				<td>|</td>
 				<td><a target="<?=$linktarget;?>" class="headerlink" href="templates.php">Templates</a></td>
 				<td>|</td>
-				<td><a target="<?=$linktarget;?>" class="headerlink" href="<?=$path_config['doc_root'];?>hosts.php">Hosts</a></td>			       
+				<td><a target="<?=$linktarget;?>" class="headerlink" href="<?=$path_config['doc_root'];?>hosts.php">Hosts</a></td>
 				<td>|</td>
+                                <td><a target="<?=$linktarget;?>" class="headerlink" href="<?=$path_config['doc_root'];?>add_multiple_hosts.php">Add Multiple Hosts</a></td>
+                                <td>|</td>
                                 <td><a target="<?=$linktarget;?>" class="headerlink" href="<?=$path_config['doc_root'];?>update_host_doc_search.php">Host Documentation</a></td>
 				<td>|</td>
 				<td><a target="<?=$linktarget;?>" class="headerlink" href="<?=$path_config['doc_root'];?>hostgroups.php">Host Groups</a></td>

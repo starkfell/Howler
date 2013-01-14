@@ -30,7 +30,7 @@ $sitedb_config['database'] = 'opcfg';
 $sitedb_config['dbserv']   = 'mysql';
 
 // System Configuration
-$sys_config['name'] = 'OpCfg - 1.2.5';
+$sys_config['name'] = 'OpCfg - 1.2.6';
 $sys_config['version'] = '- Configured For Icinga Core 1.8.1';
 $sys_config['base_dir'] = '/usr/local/icinga';
 $sys_config['web_dir'] = $sys_config['base_dir'] . '/share';
